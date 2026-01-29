@@ -3,219 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Life RPG: Pressure Wash</title>
+    <title>Business RPG: Master Edition</title>
     <style>
         :root {
-            --bg: #1a1a2e;
-            --card: #16213e;
-            --highlight: #0f3460;
-            --text: #e94560;
-            --gold: #ffd700;
-            --str: #e74c3c;
-            --cha: #9b59b6;
-            --int: #3498db;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --primary: #3b82f6;
+            --accent: #8b5cf6;
+            --gold: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --text: #f1f5f9;
         }
-        body { font-family: 'Courier New', monospace; background: var(--bg); color: white; margin: 0; padding: 15px; user-select: none; -webkit-user-select: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .container { width: 100%; max-width: 450px; }
         
-        /* HEADER DEL PERSONAJE */
-        .header { text-align: center; margin-bottom: 20px; }
-        .level-badge { font-size: 40px; font-weight: bold; color: var(--gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        .sub-text { color: #888; font-size: 14px; margin-top: -5px; display: block; }
+        /* PANTALLAS */
+        .screen { display: none; animation: fadeIn 0.5s; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CREACIÓN DE PERSONAJE */
+        h1, h2 { text-align: center; color: var(--primary); margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #94a3b8; font-size: 12px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 15px; background: var(--card); border: 2px solid #334155; color: white; border-radius: 10px; font-size: 16px; outline: none; box-sizing: border-box; }
+        input:focus, select:focus { border-color: var(--primary); }
         
-        /* BARRA DE XP */
-        .xp-container { background: #333; height: 20px; border-radius: 10px; margin: 10px 0; border: 2px solid #555; position: relative; overflow: hidden; }
-        .xp-fill { background: linear-gradient(90deg, #f1c40f, #e67e22); height: 100%; width: 0%; transition: width 0.5s ease-out; }
-        .xp-text { position: absolute; top: 0; width: 100%; text-align: center; font-size: 12px; line-height: 20px; color: black; font-weight: bold; }
+        .btn-start { background: linear-gradient(135deg, var(--primary), var(--accent)); width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; }
 
-        /* ESTADÍSTICAS */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-box { background: var(--card); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
-        .stat-val { font-size: 18px; font-weight: bold; display: block; }
-        .stat-label { font-size: 10px; opacity: 0.7; }
-        .c-str { color: var(--str); }
-        .c-cha { color: var(--cha); }
-        .c-int { color: var(--int); }
+        /* DASHBOARD JUEGO */
+        .profile-card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #334155; position: relative; }
+        .clan-badge { position: absolute; top: 15px; right: 15px; background: #0f172a; padding: 5px 10px; border-radius: 20px; font-size: 12px; border: 1px solid var(--accent); color: var(--accent); }
+        .char-name { font-size: 24px; font-weight: 800; margin: 0; }
+        .char-class { color: #94a3b8; font-size: 14px; margin-bottom: 10px; display: block; }
+        
+        /* BARRA DE PROGRESO */
+        .level-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
+        .lvl-num { font-size: 30px; font-weight: bold; color: var(--gold); }
+        .xp-track { background: #0f172a; height: 12px; border-radius: 6px; overflow: hidden; position: relative; }
+        .xp-fill { background: var(--gold); height: 100%; width: 0%; transition: width 0.3s ease; }
 
-        /* MISIONES (BOTONES) */
-        h3 { border-bottom: 2px solid var(--highlight); padding-bottom: 5px; margin-top: 0; }
-        .quest-btn { 
-            width: 100%; 
-            background: var(--card); 
-            border: 1px solid var(--highlight); 
-            color: white; 
-            padding: 15px; 
-            margin-bottom: 10px; 
-            border-radius: 8px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            font-family: inherit;
-            font-size: 14px;
-            cursor: pointer;
-            transition: transform 0.1s;
+        /* STATS */
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .stat-card { background: #0f172a; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #334155; }
+        .stat-val { font-size: 20px; font-weight: bold; display: block; }
+        .stat-name { font-size: 10px; color: #64748b; font-weight: bold; }
+        .s-str { color: #ef4444; } .s-cha { color: #f472b6; } .s-int { color: #3b82f6; }
+
+        /* MISIONES */
+        .mission-group { margin-bottom: 25px; }
+        .group-title { font-size: 12px; color: #64748b; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px; }
+        .mission-btn { 
+            width: 100%; background: var(--card); border: 1px solid #334155; 
+            padding: 15px; border-radius: 12px; margin-bottom: 10px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            color: white; font-size: 14px; cursor: pointer; transition: 0.2s; 
         }
-        .quest-btn:active { transform: scale(0.98); background: var(--highlight); }
-        .quest-xp { color: var(--gold); font-weight: bold; }
-        .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-right: 5px; }
-        
-        /* NOTIFICACIONES */
-        #notification {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.9); color: var(--gold); padding: 10px 20px;
-            border-radius: 20px; border: 1px solid var(--gold); opacity: 0; transition: opacity 0.3s;
-            pointer-events: none; z-index: 100; font-weight: bold; text-align: center; width: 80%;
-        }
+        .mission-btn:active { transform: scale(0.98); background: #334155; }
+        .xp-badge { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: var(--gold); }
 
-        /* RESET */
-        .danger-zone { margin-top: 50px; text-align: center; }
-        .btn-reset { background: transparent; color: #555; border: 1px solid #333; padding: 10px; font-size: 10px; border-radius: 5px; }
+        /* RESET MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; border: 1px solid var(--danger); }
+        .btn-danger { background: var(--danger); width: 100%; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; margin-top: 10px; font-size: 16px; }
+        .btn-cancel { background: transparent; border: none; color: #94a3b8; margin-top: 15px; font-size: 14px; text-decoration: underline; }
+        
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; padding: 10px 20px; border-radius: 30px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 50; }
+        .settings-btn { text-align: center; margin-top: 40px; }
+        .settings-link { color: #475569; font-size: 12px; text-decoration: none; border-bottom: 1px dotted #475569; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <span class="sub-text">NIVEL ACTUAL</span>
-        <div class="level-badge" id="level">1</div>
-        <div class="xp-container">
-            <div class="xp-fill" id="xp-bar"></div>
-            <div class="xp-text" id="xp-text">0 / 1000 XP</div>
-        </div>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-box c-str">
-            <span class="stat-val" id="stat-str">0</span>
-            <span class="stat-label">FUERZA</span>
-        </div>
-        <div class="stat-box c-cha">
-            <span class="stat-val" id="stat-cha">0</span>
-            <span class="stat-label">CARISMA</span>
-        </div>
-        <div class="stat-box c-int">
-            <span class="stat-val" id="stat-int">0</span>
-            <span class="stat-label">INTELIG.</span>
-        </div>
-    </div>
-
-    <h3>MISIONES DISPONIBLES</h3>
+<div class="container">
     
-    <button class="quest-btn" onclick="completarMision(100, 'str', 1, '¡Trabajo completado!')">
-        <div><span class="tag" style="background:var(--str)">STR</span> Lavar Casa/Driveway</div>
-        <span class="quest-xp">+100 XP</span>
-    </button>
+    <div id="screen-create" class="screen">
+        <h1>CREA TU HÉROE</h1>
+        
+        <div class="input-group">
+            <label>Nombre del Personaje</label>
+            <input type="text" id="inp-name" placeholder="Ej: Max Power">
+        </div>
 
-    <button class="quest-btn" onclick="completarMision(150, 'cha', 1, '¡Nuevo cliente!')">
-        <div><span class="tag" style="background:var(--cha)">CHA</span> Cerrar Cliente Nuevo</div>
-        <span class="quest-xp">+150 XP</span>
-    </button>
+        <div class="input-group">
+            <label>Clase (Tu Rol)</label>
+            <input type="text" id="inp-class" placeholder="Ej: Fundador, CEO, Freelancer...">
+        </div>
 
-    <button class="quest-btn" onclick="completarMision(300, 'cha', 2, '¡Buena reseña!')">
-        <div><span class="tag" style="background:var(--cha)">CHA</span> Recibir Review 5★</div>
-        <span class="quest-xp">+300 XP</span>
-    </button>
+        <div class="input-group">
+            <label>Selecciona tu Clan</label>
+            <select id="inp-clan">
+                <option value="🦁 Orgullosos Leones">🦁 Orgullosos Leones (Líderes)</option>
+                <option value="🦊 Encantadores Diplomáticos">🦊 Encantadores Diplomáticos (Ventas)</option>
+                <option value="🔮 Magos Creativos">🔮 Magos Creativos (Innovación)</option>
+                <option value="🐍 Serpientes Sabias">🐍 Serpientes Sabias (Estrategia)</option>
+                <option value="🐐 Corredores de Montañas">🐐 Corredores de Montañas (Resistencia)</option>
+            </select>
+        </div>
 
-    <button class="quest-btn" onclick="completarMision(50, 'int', 1, 'Cotización enviada')">
-        <div><span class="tag" style="background:var(--int)">INT</span> Enviar Cotización</div>
-        <span class="quest-xp">+50 XP</span>
-    </button>
-    
-    <button class="quest-btn" onclick="completarMision(200, 'int', 2, 'Equipo mantenido')">
-        <div><span class="tag" style="background:var(--int)">INT</span> Mantenimiento Equipo</div>
-        <span class="quest-xp">+200 XP</span>
-    </button>
+        <div class="input-group">
+            <label>Industria / Sector</label>
+            <select id="inp-industry">
+                <option value="trades">🛠️ Oficios / Manual (Construcción, Limpieza, Mecánica)</option>
+                <option value="tech">💻 Tecnología / IT (Programación, Reparación, Redes)</option>
+                <option value="pro">⚖️ Servicios Profesionales (Leyes, Contabilidad, Consultoría)</option>
+                <option value="sales">💰 Ventas / Retail (Inmobiliaria, Tiendas, E-commerce)</option>
+                <option value="health">❤️ Salud / Wellness (Entrenador, Terapeuta, Cuidado)</option>
+                <option value="art">🎨 Creativo / Arte (Diseño, Música, Escritura)</option>
+                <option value="food">🍔 Gastronomía / Eventos (Restaurantes, Catering)</option>
+            </select>
+        </div>
 
-    <div class="danger-zone">
-        <button class="btn-reset" onclick="hardReset()">⚠️ Reiniciar Personaje (Borrar Todo)</button>
+        <button class="btn-start" onclick="createCharacter()">COMENZAR AVENTURA</button>
     </div>
 
-    <div id="notification"></div>
+    <div id="screen-game" class="screen">
+        <div class="profile-card">
+            <span class="clan-badge" id="display-clan">Clan</span>
+            <h2 class="char-name" id="display-name">Nombre</h2>
+            <span class="char-class" id="display-class">Clase | Industria</span>
+            
+            <div class="level-info">
+                <span>Nivel Actual</span>
+                <span class="lvl-num" id="display-level">1</span>
+            </div>
+            <div class="xp-track">
+                <div class="xp-fill" id="xp-bar"></div>
+            </div>
+            <div style="text-align: right; font-size: 10px; color: #64748b; margin-top: 5px;" id="xp-text">0/1000</div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <span class="stat-val s-str" id="val-str">0</span>
+                <span class="stat-name">FUERZA</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-val s-cha" id="val-cha">0</span>
+                <span class="stat-name">CARISMA</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-val s-int" id="val-int">0</span>
+                <span class="stat-name">INTELIG.</span>
+            </div>
+        </div>
+
+        <div id="mission-container">
+            </div>
+
+        <div class="settings-btn">
+            <a href="#" class="settings-link" onclick="openResetModal()">Opciones de Reinicio</a>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="reset-modal">
+    <div class="modal">
+        <h3 style="color:var(--danger)">⚠️ ZONA DE PELIGRO</h3>
+        <p style="font-size:14px; color:#94a3b8">Para borrar tu progreso permanentemente, escribe el nombre exacto de tu personaje:</p>
+        <p style="font-weight:bold; color:white" id="confirm-name-hint">NOMBRE</p>
+        <input type="text" id="reset-input" placeholder="Escribe el nombre aquí..." style="text-align:center; margin-bottom:10px;">
+        <button class="btn-danger" onclick="confirmReset()">BORRAR Y REINICIAR</button>
+        <button class="btn-cancel" onclick="closeResetModal()">Cancelar</button>
+    </div>
+</div>
+
+<div class="toast" id="toast">¡+100 XP GANADA!</div>
 
 <script>
-    // ESTADO INICIAL DEL JUEGO
-    let game = {
-        level: 1,
-        xp: 0,
-        nextLevel: 1000,
+    // --- LÓGICA DEL JUEGO ---
+
+    // Configuración de textos según industria
+    const industryData = {
+        trades: { str: "Trabajo Físico Duro", cha: "Trato con Cliente", int: "Cotizar/Gestión" },
+        tech: { str: "Coding/Focus Intenso", cha: "Reunión/Soporte", int: "Aprender/Optimizar" },
+        pro: { str: "Horas Extra/Carga", cha: "Networking/Reunión", int: "Análisis/Estrategia" },
+        sales: { str: "Trabajo de Campo", cha: "Cerrar Venta", int: "Admin/Leads" },
+        health: { str: "Entrenamiento/Sesión", cha: "Empatía Paciente", int: "Planificación" },
+        art: { str: "Maratón Creativa", cha: "Vender la Obra", int: "Técnica/Estudio" },
+        food: { str: "Servicio/Cocina", cha: "Atención Mesa", int: "Inventario/Costos" }
+    };
+
+    let player = {
+        name: "", class: "", clan: "", industry: "trades",
+        level: 1, xp: 0, nextXp: 1000,
         stats: { str: 0, cha: 0, int: 0 }
     };
 
-    // CARGAR DATOS GUARDADOS
-    function loadGame() {
-        const saved = localStorage.getItem('rpg_lavado_save');
+    // INICIALIZACIÓN
+    window.onload = function() {
+        const saved = localStorage.getItem('biz_rpg_v2');
         if (saved) {
-            game = JSON.parse(saved);
-        }
-        updateUI();
-    }
-
-    // GUARDAR DATOS
-    function saveGame() {
-        localStorage.setItem('rpg_lavado_save', JSON.stringify(game));
-    }
-
-    // SISTEMA DE MISIONES
-    function completarMision(xpGanada, statType, statAmount, mensaje) {
-        // Ganar XP
-        game.xp += xpGanada;
-        
-        // Subir Stat
-        if(statType) {
-            game.stats[statType] += statAmount;
-        }
-
-        // Chequear Level Up
-        let levelUp = false;
-        if (game.xp >= game.nextLevel) {
-            game.level++;
-            game.xp = game.xp - game.nextLevel;
-            game.nextLevel = Math.floor(game.nextLevel * 1.2); // Cada nivel pide 20% más
-            levelUp = true;
-            showNotification(`¡SUBISTE AL NIVEL ${game.level}! 🎉`);
+            player = JSON.parse(saved);
+            startGameUI();
         } else {
-            showNotification(`${mensaje} (+${xpGanada} XP)`);
+            document.getElementById('screen-create').classList.add('active');
         }
-
-        saveGame();
-        updateUI();
     }
 
-    // ACTUALIZAR PANTALLA
-    function updateUI() {
-        document.getElementById('level').innerText = game.level;
-        document.getElementById('stat-str').innerText = game.stats.str;
-        document.getElementById('stat-cha').innerText = game.stats.cha;
-        document.getElementById('stat-int').innerText = game.stats.int;
+    function createCharacter() {
+        const name = document.getElementById('inp-name').value;
+        const cls = document.getElementById('inp-class').value;
+        if (!name) return alert("¡Tu héroe necesita un nombre!");
 
-        // Barra XP
-        const porcentaje = (game.xp / game.nextLevel) * 100;
-        document.getElementById('xp-bar').style.width = porcentaje + "%";
-        document.getElementById('xp-text').innerText = `${Math.floor(game.xp)} / ${game.nextLevel} XP`;
-    }
-
-    // NOTIFICACIONES FLOTANTES
-    function showNotification(text) {
-        const notif = document.getElementById('notification');
-        notif.innerText = text;
-        notif.style.opacity = 1;
-        notif.style.transform = "translateX(-50%) translateY(-10px)";
+        player.name = name;
+        player.class = cls || "Aventurero";
+        player.clan = document.getElementById('inp-clan').value;
+        player.industry = document.getElementById('inp-industry').value;
         
-        setTimeout(() => {
-            notif.style.opacity = 0;
-            notif.style.transform = "translateX(-50%) translateY(0)";
-        }, 2000);
+        saveData();
+        location.reload(); // Recarga para aplicar cambios limpios
     }
 
-    // BORRAR TODO
-    function hardReset() {
-        if(confirm("¿Seguro que quieres borrar a tu personaje y empezar desde cero?")) {
-            localStorage.removeItem('rpg_lavado_save');
+    function startGameUI() {
+        document.getElementById('screen-create').classList.remove('active');
+        document.getElementById('screen-game').classList.add('active');
+
+        // Llenar datos visuales
+        document.getElementById('display-name').innerText = player.name;
+        document.getElementById('display-class').innerText = `${player.class}`;
+        document.getElementById('display-clan').innerText = player.clan;
+        document.getElementById('confirm-name-hint').innerText = player.name; // Para el reset
+
+        // Generar misiones basadas en industria
+        renderMissions();
+        updateStatsUI();
+    }
+
+    function renderMissions() {
+        const labels = industryData[player.industry] || industryData.trades;
+        const container = document.getElementById('mission-container');
+        
+        container.innerHTML = `
+            <div class="mission-group">
+                <div class="group-title">ACCIONES DE FUERZA (TRABAJO)</div>
+                <div class="mission-btn" onclick="gainXP(100, 'str')">
+                    <span>👊 ${labels.str} (Pequeño)</span> <span class="xp-badge">+100 XP</span>
+                </div>
+                <div class="mission-btn" onclick="gainXP(300, 'str')">
+                    <span>🔥 ${labels.str} (Grande)</span> <span class="xp-badge">+300 XP</span>
+                </div>
+            </div>
+
+            <div class="mission-group">
+                <div class="group-title">ACCIONES DE CARISMA (SOCIAL)</div>
+                <div class="mission-btn" onclick="gainXP(150, 'cha')">
+                    <span>🗣️ ${labels.cha} (Contacto)</span> <span class="xp-badge">+150 XP</span>
+                </div>
+                <div class="mission-btn" onclick="gainXP(400, 'cha')">
+                    <span>🤝 ${labels.cha} (Éxito Total)</span> <span class="xp-badge">+400 XP</span>
+                </div>
+            </div>
+
+            <div class="mission-group">
+                <div class="group-title">ACCIONES DE INTELIGENCIA (MENTE)</div>
+                <div class="mission-btn" onclick="gainXP(100, 'int')">
+                    <span>🧠 ${labels.int} (Tarea)</span> <span class="xp-badge">+100 XP</span>
+                </div>
+                <div class="mission-btn" onclick="gainXP(250, 'int')">
+                    <span>📈 ${labels.int} (Proyecto)</span> <span class="xp-badge">+250 XP</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function gainXP(amount, stat) {
+        player.xp += amount;
+        player.stats[stat] += 1; // Incrementa el stat específico un poco
+
+        // Level Up Logic
+        if (player.xp >= player.nextXp) {
+            player.level++;
+            player.xp = player.xp - player.nextXp;
+            player.nextXp = Math.floor(player.nextXp * 1.25); // Curva de dificultad
+            showToast(`🎉 ¡NIVEL ${player.level} ALCANZADO!`);
+        } else {
+            showToast(`+${amount} XP | ${stat.toUpperCase()} UP!`);
+        }
+
+        saveData();
+        updateStatsUI();
+    }
+
+    function updateStatsUI() {
+        document.getElementById('display-level').innerText = player.level;
+        document.getElementById('val-str').innerText = player.stats.str;
+        document.getElementById('val-cha').innerText = player.stats.cha;
+        document.getElementById('val-int').innerText = player.stats.int;
+
+        const pct = (player.xp / player.nextXp) * 100;
+        document.getElementById('xp-bar').style.width = pct + "%";
+        document.getElementById('xp-text').innerText = `${Math.floor(player.xp)} / ${player.nextXp}`;
+    }
+
+    function saveData() {
+        localStorage.setItem('biz_rpg_v2', JSON.stringify(player));
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.opacity = 1;
+        t.style.bottom = "40px";
+        setTimeout(() => { t.style.opacity = 0; t.style.bottom = "20px"; }, 2000);
+    }
+
+    // --- RESET SYSTEM ---
+    function openResetModal() { document.getElementById('reset-modal').style.display = 'flex'; }
+    function closeResetModal() { document.getElementById('reset-modal').style.display = 'none'; }
+    
+    function confirmReset() {
+        const input = document.getElementById('reset-input').value;
+        if (input === player.name) {
+            localStorage.removeItem('biz_rpg_v2');
             location.reload();
+        } else {
+            alert("El nombre no coincide. Escríbelo tal cual aparece en tu perfil.");
         }
     }
-
-    // INICIAR
-    loadGame();
-
 </script>
+
 </body>
 </html>
