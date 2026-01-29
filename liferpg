@@ -3,327 +3,417 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Business RPG: Master Edition</title>
+    <title>RPG Life: Scholar Edition</title>
     <style>
-        :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --primary: #3b82f6;
-            --accent: #8b5cf6;
-            --gold: #f59e0b;
-            --danger: #ef4444;
-            --success: #10b981;
-            --text: #f1f5f9;
-        }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .container { width: 100%; max-width: 450px; }
+        :root { --bg: #0f172a; --card: #1e293b; --primary: #3b82f6; --accent: #8b5cf6; --gold: #f59e0b; --danger: #ef4444; --text: #f8fafc; --muted: #94a3b8; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 420px; position: relative; }
         
-        /* PANTALLAS */
-        .screen { display: none; animation: fadeIn 0.5s; }
-        .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* UI Components */
+        .lang-switch { position: absolute; top: -35px; right: 0; display: flex; gap: 5px; }
+        .lang-btn { background: var(--card); border: 1px solid #334155; color: var(--muted); padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* CREACIÓN DE PERSONAJE */
-        h1, h2 { text-align: center; color: var(--primary); margin-bottom: 20px; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #94a3b8; font-size: 12px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 15px; background: var(--card); border: 2px solid #334155; color: white; border-radius: 10px; font-size: 16px; outline: none; box-sizing: border-box; }
+        .screen { display: none; animation: fade 0.4s; }
+        .active { display: block; }
+        @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1, h2 { text-align: center; color: var(--primary); margin: 0 0 15px 0; }
+        label { display: block; color: var(--muted); font-size: 11px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; background: var(--card); border: 2px solid #334155; color: white; border-radius: 8px; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
         input:focus, select:focus { border-color: var(--primary); }
         
-        .btn-start { background: linear-gradient(135deg, var(--primary), var(--accent)); width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; }
+        .btn-main { background: linear-gradient(135deg, var(--primary), var(--accent)); width: 100%; padding: 14px; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
 
-        /* DASHBOARD JUEGO */
-        .profile-card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #334155; position: relative; }
-        .clan-badge { position: absolute; top: 15px; right: 15px; background: #0f172a; padding: 5px 10px; border-radius: 20px; font-size: 12px; border: 1px solid var(--accent); color: var(--accent); }
-        .char-name { font-size: 24px; font-weight: 800; margin: 0; }
-        .char-class { color: #94a3b8; font-size: 14px; margin-bottom: 10px; display: block; }
+        /* MODE TOGGLE */
+        .mode-toggle { display: flex; background: var(--card); border-radius: 10px; padding: 4px; margin-bottom: 20px; border: 1px solid #334155; }
+        .mode-btn { flex: 1; border: none; background: none; color: var(--muted); padding: 10px; font-weight: bold; font-size: 13px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .mode-btn.active { background: var(--primary); color: white; shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        /* Profile */
+        .profile-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid #334155; position: relative; margin-bottom: 20px; }
+        .clan-tag { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 10px; color: var(--accent); border: 1px solid var(--accent); }
+        .char-name { font-size: 22px; font-weight: 800; }
+        .char-job { color: var(--muted); font-size: 13px; display: block; margin-bottom: 10px; }
         
-        /* BARRA DE PROGRESO */
-        .level-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
-        .lvl-num { font-size: 30px; font-weight: bold; color: var(--gold); }
-        .xp-track { background: #0f172a; height: 12px; border-radius: 6px; overflow: hidden; position: relative; }
-        .xp-fill { background: var(--gold); height: 100%; width: 0%; transition: width 0.3s ease; }
+        .level-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; font-size: 12px; color: var(--muted); }
+        .lvl-big { font-size: 24px; color: var(--gold); font-weight: bold; line-height: 1; }
+        .xp-bar-bg { background: #0f172a; height: 8px; border-radius: 4px; overflow: hidden; }
+        .xp-bar-fill { background: var(--gold); height: 100%; width: 0%; transition: width 0.3s; }
 
-        /* STATS */
-        .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
-        .stat-card { background: #0f172a; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #334155; }
-        .stat-val { font-size: 20px; font-weight: bold; display: block; }
-        .stat-name { font-size: 10px; color: #64748b; font-weight: bold; }
-        .s-str { color: #ef4444; } .s-cha { color: #f472b6; } .s-int { color: #3b82f6; }
+        /* Stats */
+        .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .stat-box { background: #0f172a; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #334155; }
+        .s-val { font-size: 20px; font-weight: bold; display: block; }
+        .s-lbl { font-size: 9px; color: var(--muted); font-weight: bold; text-transform: uppercase; }
+        .c-str { color: #ef4444; } .c-cha { color: #f472b6; } .c-int { color: #3b82f6; }
 
-        /* MISIONES */
-        .mission-group { margin-bottom: 25px; }
-        .group-title { font-size: 12px; color: #64748b; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px; }
-        .mission-btn { 
-            width: 100%; background: var(--card); border: 1px solid #334155; 
-            padding: 15px; border-radius: 12px; margin-bottom: 10px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            color: white; font-size: 14px; cursor: pointer; transition: 0.2s; 
+        /* Missions */
+        .m-group { margin-bottom: 15px; }
+        .m-head { font-size: 10px; color: var(--muted); font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #334155; margin-bottom: 8px; padding-bottom: 2px; }
+        .m-btn { 
+            background: var(--card); border: 1px solid #334155; padding: 12px; border-radius: 10px; 
+            margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; 
+            color: white; text-align: left; cursor: pointer; transition: 0.1s;
         }
-        .mission-btn:active { transform: scale(0.98); background: #334155; }
-        .xp-badge { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: var(--gold); }
+        .m-btn:active { transform: scale(0.98); background: #334155; border-color: var(--primary); }
+        .m-info { flex: 1; margin-right: 10px; }
+        .m-title { font-size: 14px; font-weight: 600; display: block; }
+        .m-desc { font-size: 11px; color: var(--muted); font-style: italic; }
+        .xp-badge { background: rgba(255,255,255,0.05); padding: 5px 8px; border-radius: 6px; font-size: 11px; color: var(--gold); font-weight: bold; }
 
-        /* RESET MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; border: 1px solid var(--danger); }
-        .btn-danger { background: var(--danger); width: 100%; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; margin-top: 10px; font-size: 16px; }
-        .btn-cancel { background: transparent; border: none; color: #94a3b8; margin-top: 15px; font-size: 14px; text-decoration: underline; }
-        
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; padding: 10px 20px; border-radius: 30px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 50; }
-        .settings-btn { text-align: center; margin-top: 40px; }
-        .settings-link { color: #475569; font-size: 12px; text-decoration: none; border-bottom: 1px dotted #475569; }
+        /* Toast & Modal */
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; padding: 8px 16px; border-radius: 20px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 99; width: 80%; text-align: center; }
+        .settings-link { display: block; text-align: center; color: #475569; font-size: 12px; text-decoration: underline; margin-top: 20px; cursor: pointer; }
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+        .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 100%; max-width: 320px; text-align: center; border: 1px solid var(--danger); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    
+    <div class="lang-switch">
+        <button class="lang-btn active" id="btn-es" onclick="setLang('es')">ES</button>
+        <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+
     <div id="screen-create" class="screen">
-        <h1>CREA TU HÉROE</h1>
+        <h1 data-t="t_create">CREA TU PERFIL</h1>
         
-        <div class="input-group">
-            <label>Nombre del Personaje</label>
-            <input type="text" id="inp-name" placeholder="Ej: Max Power">
+        <div class="mode-toggle">
+            <button class="mode-btn active" id="t-work" onclick="setMode('work')">👔 TRABAJO</button>
+            <button class="mode-btn" id="t-study" onclick="setMode('study')">🎓 ESTUDIO</button>
         </div>
 
-        <div class="input-group">
-            <label>Clase (Tu Rol)</label>
-            <input type="text" id="inp-class" placeholder="Ej: Fundador, CEO, Freelancer...">
-        </div>
+        <label data-t="l_name">Nombre</label>
+        <input type="text" id="inp-name" placeholder="...">
+        
+        <label data-t="l_clan">Clan</label>
+        <select id="inp-clan"></select>
 
-        <div class="input-group">
-            <label>Selecciona tu Clan</label>
-            <select id="inp-clan">
-                <option value="🦁 Orgullosos Leones">🦁 Orgullosos Leones (Líderes)</option>
-                <option value="🦊 Encantadores Diplomáticos">🦊 Encantadores Diplomáticos (Ventas)</option>
-                <option value="🔮 Magos Creativos">🔮 Magos Creativos (Innovación)</option>
-                <option value="🐍 Serpientes Sabias">🐍 Serpientes Sabias (Estrategia)</option>
-                <option value="🐐 Corredores de Montañas">🐐 Corredores de Montañas (Resistencia)</option>
-            </select>
-        </div>
+        <label id="lbl-cat" data-t="l_cat">Industria</label>
+        <select id="inp-category" onchange="updateSubSelect()"></select>
 
-        <div class="input-group">
-            <label>Industria / Sector</label>
-            <select id="inp-industry">
-                <option value="trades">🛠️ Oficios / Manual (Construcción, Limpieza, Mecánica)</option>
-                <option value="tech">💻 Tecnología / IT (Programación, Reparación, Redes)</option>
-                <option value="pro">⚖️ Servicios Profesionales (Leyes, Contabilidad, Consultoría)</option>
-                <option value="sales">💰 Ventas / Retail (Inmobiliaria, Tiendas, E-commerce)</option>
-                <option value="health">❤️ Salud / Wellness (Entrenador, Terapeuta, Cuidado)</option>
-                <option value="art">🎨 Creativo / Arte (Diseño, Música, Escritura)</option>
-                <option value="food">🍔 Gastronomía / Eventos (Restaurantes, Catering)</option>
-            </select>
-        </div>
+        <label id="lbl-job" data-t="l_job">Especialidad</label>
+        <select id="inp-job"></select>
 
-        <button class="btn-start" onclick="createCharacter()">COMENZAR AVENTURA</button>
+        <button class="btn-main" onclick="startGame()" data-t="b_start">EMPEZAR</button>
     </div>
 
     <div id="screen-game" class="screen">
         <div class="profile-card">
-            <span class="clan-badge" id="display-clan">Clan</span>
-            <h2 class="char-name" id="display-name">Nombre</h2>
-            <span class="char-class" id="display-class">Clase | Industria</span>
-            
-            <div class="level-info">
-                <span>Nivel Actual</span>
-                <span class="lvl-num" id="display-level">1</span>
+            <span class="clan-tag" id="ui-clan">Clan</span>
+            <div class="char-name" id="ui-name">Name</div>
+            <span class="char-job" id="ui-job">Job Title</span>
+            <div class="level-row">
+                <span data-t="l_lvl">Nivel Actual</span>
+                <span class="lvl-big" id="ui-lvl">1</span>
             </div>
-            <div class="xp-track">
-                <div class="xp-fill" id="xp-bar"></div>
-            </div>
-            <div style="text-align: right; font-size: 10px; color: #64748b; margin-top: 5px;" id="xp-text">0/1000</div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill" id="ui-xp"></div></div>
+            <div style="text-align:right; font-size:10px; color:#64748b; margin-top:4px" id="ui-xp-txt">0/1000</div>
         </div>
 
-        <div class="stats-row">
-            <div class="stat-card">
-                <span class="stat-val s-str" id="val-str">0</span>
-                <span class="stat-name">FUERZA</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-val s-cha" id="val-cha">0</span>
-                <span class="stat-name">CARISMA</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-val s-int" id="val-int">0</span>
-                <span class="stat-name">INTELIG.</span>
-            </div>
+        <div class="stats">
+            <div class="stat-box"><span class="s-val c-str" id="v-str">0</span><span class="s-lbl" data-t="s_str">FUERZA</span></div>
+            <div class="stat-box"><span class="s-val c-cha" id="v-cha">0</span><span class="s-lbl" data-t="s_cha">CARISMA</span></div>
+            <div class="stat-box"><span class="s-val c-int" id="v-int">0</span><span class="s-lbl" data-t="s_int">MENTE</span></div>
         </div>
 
-        <div id="mission-container">
-            </div>
-
-        <div class="settings-btn">
-            <a href="#" class="settings-link" onclick="openResetModal()">Opciones de Reinicio</a>
-        </div>
+        <div id="missions-area"></div>
+        <div class="settings-link" onclick="openReset()" data-t="b_reset">Reiniciar / Reset</div>
     </div>
-
 </div>
 
-<div class="modal-overlay" id="reset-modal">
+<div class="modal-bg" id="modal-reset">
     <div class="modal">
-        <h3 style="color:var(--danger)">⚠️ ZONA DE PELIGRO</h3>
-        <p style="font-size:14px; color:#94a3b8">Para borrar tu progreso permanentemente, escribe el nombre exacto de tu personaje:</p>
-        <p style="font-weight:bold; color:white" id="confirm-name-hint">NOMBRE</p>
-        <input type="text" id="reset-input" placeholder="Escribe el nombre aquí..." style="text-align:center; margin-bottom:10px;">
-        <button class="btn-danger" onclick="confirmReset()">BORRAR Y REINICIAR</button>
-        <button class="btn-cancel" onclick="closeResetModal()">Cancelar</button>
+        <h3 style="color:var(--danger)" data-t="t_danger">⚠️ ZONA DE PELIGRO</h3>
+        <p style="font-size:13px; color:#ccc" data-t="d_reset">Escribe tu nombre exacto:</p>
+        <strong id="reset-hint" style="color:white; display:block; margin-bottom:10px">NAME</strong>
+        <input type="text" id="inp-reset" style="text-align:center">
+        <button class="btn-main" style="background:var(--danger)" onclick="confirmReset()" data-t="b_del">BORRAR</button>
+        <button style="background:none; border:none; color:#888; text-decoration:underline; margin-top:10px" onclick="closeReset()">Cancelar</button>
     </div>
 </div>
 
-<div class="toast" id="toast">¡+100 XP GANADA!</div>
+<div class="toast" id="toast"></div>
 
 <script>
-    // --- LÓGICA DEL JUEGO ---
-
-    // Configuración de textos según industria
-    const industryData = {
-        trades: { str: "Trabajo Físico Duro", cha: "Trato con Cliente", int: "Cotizar/Gestión" },
-        tech: { str: "Coding/Focus Intenso", cha: "Reunión/Soporte", int: "Aprender/Optimizar" },
-        pro: { str: "Horas Extra/Carga", cha: "Networking/Reunión", int: "Análisis/Estrategia" },
-        sales: { str: "Trabajo de Campo", cha: "Cerrar Venta", int: "Admin/Leads" },
-        health: { str: "Entrenamiento/Sesión", cha: "Empatía Paciente", int: "Planificación" },
-        art: { str: "Maratón Creativa", cha: "Vender la Obra", int: "Técnica/Estudio" },
-        food: { str: "Servicio/Cocina", cha: "Atención Mesa", int: "Inventario/Costos" }
-    };
-
-    let player = {
-        name: "", class: "", clan: "", industry: "trades",
-        level: 1, xp: 0, nextXp: 1000,
-        stats: { str: 0, cha: 0, int: 0 }
-    };
-
-    // INICIALIZACIÓN
-    window.onload = function() {
-        const saved = localStorage.getItem('biz_rpg_v2');
-        if (saved) {
-            player = JSON.parse(saved);
-            startGameUI();
-        } else {
-            document.getElementById('screen-create').classList.add('active');
+/* --- BASE DE DATOS (WORK + STUDENT) --- */
+const DB = {
+    // --- WORK SECTOR ---
+    cat_trades: {
+        type: 'work', es: "Oficios / Manual", en: "Trades / Manual",
+        jobs: {
+            pressure: {
+                es: "Lavado a Presión", en: "Pressure Washing",
+                m: [
+                    {s:'str', xp:100, t_es:"Prep. Máquina", d_es:"Mezclar químicos / Aceite", t_en:"Prep Machine", d_en:"Mix chems / Oil"},
+                    {s:'str', xp:300, t_es:"Trabajo Completo", d_es:"Lavar casa entera", t_en:"Full Job", d_en:"Wash full house"},
+                    {s:'cha', xp:150, t_es:"Foto Antes/Después", d_es:"Enviar al cliente", t_en:"Before/After Pic", d_en:"Send to client"},
+                    {s:'int', xp:250, t_es:"Cotizar Plano", d_es:"Medir pies cuadrados satélite", t_en:"Quote Map", d_en:"Measure sqft satellite"}
+                ]
+            },
+            hvac: {
+                es: "HVAC / Plomería", en: "HVAC / Plumbing",
+                m: [
+                    {s:'str', xp:120, t_es:"Instalación", d_es:"Montar unidad", t_en:"Install", d_en:"Mount unit"},
+                    {s:'int', xp:200, t_es:"Diagnóstico", d_es:"Encontrar falla eléctrica", t_en:"Diagnosis", d_en:"Find elec fault"}
+                ]
+            }
+        }
+    },
+    cat_tech: {
+        type: 'work', es: "Tecnología", en: "Technology",
+        jobs: {
+            dev: {
+                es: "Programador", en: "Developer",
+                m: [
+                    {s:'str', xp:100, t_es:"Deep Work", d_es:"1h código puro", t_en:"Deep Work", d_en:"1h pure code"},
+                    {s:'int', xp:150, t_es:"Debuguear", d_es:"Arreglar bug difícil", t_en:"Debug", d_en:"Fix tough bug"}
+                ]
+            }
+        }
+    },
+    cat_sales: {
+        type: 'work', es: "Ventas / Retail", en: "Sales",
+        jobs: {
+            realtor: {
+                es: "Bienes Raíces", en: "Real Estate",
+                m: [
+                    {s:'str', xp:200, t_es:"Open House", d_es:"Mostrar casa 2h", t_en:"Open House", d_en:"Show home 2h"},
+                    {s:'cha', xp:100, t_es:"Llamadas Frías", d_es:"10 prospectos", t_en:"Cold Calls", d_en:"10 leads"},
+                    {s:'cha', xp:500, t_es:"CERRAR TRATO", d_es:"Firmar contrato", t_en:"CLOSE DEAL", d_en:"Sign contract"}
+                ]
+            }
+        }
+    },
+    // --- STUDENT SECTOR ---
+    stu_hs: {
+        type: 'study', es: "Escuela / Secundaria", en: "High School",
+        jobs: {
+            general_hs: {
+                es: "Estudiante General", en: "General Student",
+                m: [
+                    {s:'str', xp:100, t_es:"Tarea Completa", d_es:"Sin copiar y a tiempo", t_en:"Homework Done", d_en:"No copying, on time"},
+                    {s:'str', xp:150, t_es:"Entreno/Deporte", d_es:"1h de actividad física", t_en:"Sports/Gym", d_en:"1h physical activity"},
+                    {s:'cha', xp:100, t_es:"Participación", d_es:"Levantar mano en clase 3 veces", t_en:"Participation", d_en:"Raise hand 3 times"},
+                    {s:'cha', xp:200, t_es:"Líder de Grupo", d_es:"Organizar el equipo de trabajo", t_en:"Group Leader", d_en:"Organize the team"},
+                    {s:'int', xp:150, t_es:"Examen Sorpresa", d_es:"Aprobar quiz inesperado", t_en:"Pop Quiz", d_en:"Pass surprise test"},
+                    {s:'int', xp:300, t_es:"Examen Final", d_es:"Sacar nota perfecta (A)", t_en:"Final Exam", d_en:"Get perfect grade (A)"}
+                ]
+            }
+        }
+    },
+    stu_uni: {
+        type: 'study', es: "Universidad / College", en: "University / College",
+        jobs: {
+            science: {
+                es: "Ciencias / Ingeniería", en: "STEM Major",
+                m: [
+                    {s:'str', xp:200, t_es:"Laboratorio", d_es:"Completar reporte de lab", t_en:"Lab Report", d_en:"Finish lab report"},
+                    {s:'int', xp:100, t_es:"Problemas", d_es:"Resolver set de ejercicios", t_en:"Problem Set", d_en:"Solve exercises"},
+                    {s:'int', xp:300, t_es:"Parcial / Midterm", d_es:"Aprobar examen mayor", t_en:"Midterm", d_en:"Pass major exam"}
+                ]
+            },
+            arts: {
+                es: "Humanidades / Artes", en: "Arts / Humanities",
+                m: [
+                    {s:'str', xp:150, t_es:"Lectura Masiva", d_es:"Leer 50+ páginas 1 sesión", t_en:"Heavy Reading", d_en:"Read 50+ pages 1 sitting"},
+                    {s:'int', xp:250, t_es:"Ensayo", d_es:"Escribir paper de 5+ pág", t_en:"Essay", d_en:"Write 5+ page paper"},
+                    {s:'cha', xp:200, t_es:"Debate", d_es:"Defender tesis en clase", t_en:"Debate", d_en:"Defend thesis in class"}
+                ]
+            }
+        }
+    },
+    stu_self: {
+        type: 'study', es: "Autodidacta / Bootcamp", en: "Self-Taught / Bootcamp",
+        jobs: {
+            code: {
+                es: "Coding Bootcamp", en: "Coding Bootcamp",
+                m: [
+                    {s:'str', xp:150, t_es:"Tutorial Hell", d_es:"Completar curso de 2h", t_en:"Tutorial", d_en:"Finish 2h course"},
+                    {s:'int', xp:300, t_es:"Proyecto Capstone", d_es:"Construir app portfolio", t_en:"Capstone", d_en:"Build portfolio app"},
+                    {s:'cha', xp:100, t_es:"Discord Help", d_es:"Ayudar a un compañero", t_en:"Discord Help", d_en:"Help a peer"}
+                ]
+            }
         }
     }
+};
 
-    function createCharacter() {
-        const name = document.getElementById('inp-name').value;
-        const cls = document.getElementById('inp-class').value;
-        if (!name) return alert("¡Tu héroe necesita un nombre!");
+/* --- UI TEXTS --- */
+const T = {
+    es: { t_create:"CREA TU PERFIL", l_name:"Nombre", l_clan:"Clan", l_cat:"Industria", l_cat_s:"Nivel Educativo", l_job:"Especialidad", l_job_s:"Carrera / Enfoque", b_start:"EMPEZAR", l_lvl:"Nivel", s_str:"FUERZA", s_cha:"CARISMA", s_int:"MENTE", b_reset:"Reiniciar Todo", t_danger:"ZONA DE PELIGRO", d_reset:"Escribe tu nombre para borrar:", b_del:"BORRAR", clans:["🦁 Leones (Líderes)","🦊 Diplomáticos (Social)","🔮 Magos (Creativos)","🐍 Serpientes (Estrategia)","🐐 Montañeses (Resistencia)"] },
+    en: { t_create:"CREATE PROFILE", l_name:"Name", l_clan:"Clan", l_cat:"Industry", l_cat_s:"Education Level", l_job:"Specialty", l_job_s:"Major / Focus", b_start:"START", l_lvl:"Level", s_str:"STRENGTH", s_cha:"CHARISMA", s_int:"MIND", b_reset:"Reset All", t_danger:"DANGER ZONE", d_reset:"Type name to delete:", b_del:"DELETE", clans:["🦁 Lions (Leaders)","🦊 Diplomats (Social)","🔮 Mages (Creatives)","🐍 Serpents (Strategy)","🐐 Mountaineers (Stamina)"] }
+};
 
-        player.name = name;
-        player.class = cls || "Aventurero";
-        player.clan = document.getElementById('inp-clan').value;
-        player.industry = document.getElementById('inp-industry').value;
-        
-        saveData();
-        location.reload(); // Recarga para aplicar cambios limpios
-    }
+let lang = 'es';
+let mode = 'work'; // 'work' or 'study'
+let player = { name:"", clan:"", cat:"", job:"", lvl:1, xp:0, next:1000, stats:{str:0, cha:0, int:0} };
 
-    function startGameUI() {
-        document.getElementById('screen-create').classList.remove('active');
-        document.getElementById('screen-game').classList.add('active');
-
-        // Llenar datos visuales
-        document.getElementById('display-name').innerText = player.name;
-        document.getElementById('display-class').innerText = `${player.class}`;
-        document.getElementById('display-clan').innerText = player.clan;
-        document.getElementById('confirm-name-hint').innerText = player.name; // Para el reset
-
-        // Generar misiones basadas en industria
-        renderMissions();
-        updateStatsUI();
-    }
-
-    function renderMissions() {
-        const labels = industryData[player.industry] || industryData.trades;
-        const container = document.getElementById('mission-container');
-        
-        container.innerHTML = `
-            <div class="mission-group">
-                <div class="group-title">ACCIONES DE FUERZA (TRABAJO)</div>
-                <div class="mission-btn" onclick="gainXP(100, 'str')">
-                    <span>👊 ${labels.str} (Pequeño)</span> <span class="xp-badge">+100 XP</span>
-                </div>
-                <div class="mission-btn" onclick="gainXP(300, 'str')">
-                    <span>🔥 ${labels.str} (Grande)</span> <span class="xp-badge">+300 XP</span>
-                </div>
-            </div>
-
-            <div class="mission-group">
-                <div class="group-title">ACCIONES DE CARISMA (SOCIAL)</div>
-                <div class="mission-btn" onclick="gainXP(150, 'cha')">
-                    <span>🗣️ ${labels.cha} (Contacto)</span> <span class="xp-badge">+150 XP</span>
-                </div>
-                <div class="mission-btn" onclick="gainXP(400, 'cha')">
-                    <span>🤝 ${labels.cha} (Éxito Total)</span> <span class="xp-badge">+400 XP</span>
-                </div>
-            </div>
-
-            <div class="mission-group">
-                <div class="group-title">ACCIONES DE INTELIGENCIA (MENTE)</div>
-                <div class="mission-btn" onclick="gainXP(100, 'int')">
-                    <span>🧠 ${labels.int} (Tarea)</span> <span class="xp-badge">+100 XP</span>
-                </div>
-                <div class="mission-btn" onclick="gainXP(250, 'int')">
-                    <span>📈 ${labels.int} (Proyecto)</span> <span class="xp-badge">+250 XP</span>
-                </div>
-            </div>
-        `;
-    }
-
-    function gainXP(amount, stat) {
-        player.xp += amount;
-        player.stats[stat] += 1; // Incrementa el stat específico un poco
-
-        // Level Up Logic
-        if (player.xp >= player.nextXp) {
-            player.level++;
-            player.xp = player.xp - player.nextXp;
-            player.nextXp = Math.floor(player.nextXp * 1.25); // Curva de dificultad
-            showToast(`🎉 ¡NIVEL ${player.level} ALCANZADO!`);
-        } else {
-            showToast(`+${amount} XP | ${stat.toUpperCase()} UP!`);
-        }
-
-        saveData();
-        updateStatsUI();
-    }
-
-    function updateStatsUI() {
-        document.getElementById('display-level').innerText = player.level;
-        document.getElementById('val-str').innerText = player.stats.str;
-        document.getElementById('val-cha').innerText = player.stats.cha;
-        document.getElementById('val-int').innerText = player.stats.int;
-
-        const pct = (player.xp / player.nextXp) * 100;
-        document.getElementById('xp-bar').style.width = pct + "%";
-        document.getElementById('xp-text').innerText = `${Math.floor(player.xp)} / ${player.nextXp}`;
-    }
-
-    function saveData() {
-        localStorage.setItem('biz_rpg_v2', JSON.stringify(player));
-    }
-
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.style.opacity = 1;
-        t.style.bottom = "40px";
-        setTimeout(() => { t.style.opacity = 0; t.style.bottom = "20px"; }, 2000);
-    }
-
-    // --- RESET SYSTEM ---
-    function openResetModal() { document.getElementById('reset-modal').style.display = 'flex'; }
-    function closeResetModal() { document.getElementById('reset-modal').style.display = 'none'; }
+window.onload = () => {
+    lang = localStorage.getItem('rpg_lang') || 'es';
+    setLang(lang, false);
     
-    function confirmReset() {
-        const input = document.getElementById('reset-input').value;
-        if (input === player.name) {
-            localStorage.removeItem('biz_rpg_v2');
-            location.reload();
-        } else {
-            alert("El nombre no coincide. Escríbelo tal cual aparece en tu perfil.");
-        }
-    }
-</script>
+    // Cargar Clan
+    const clanSel = document.getElementById('inp-clan');
+    clanSel.innerHTML = "";
+    T[lang].clans.forEach((c, i) => {
+        let opt = document.createElement('option');
+        opt.value = i; opt.innerText = c; clanSel.appendChild(opt);
+    });
 
+    // Check Save
+    const save = localStorage.getItem('rpg_save_v6');
+    if(save) {
+        player = JSON.parse(save);
+        initGame();
+    } else {
+        document.getElementById('screen-create').classList.add('active');
+        setMode('work'); // Default init
+    }
+};
+
+function setMode(m) {
+    mode = m;
+    // Toggle Buttons Visual
+    document.getElementById('t-work').className = m === 'work' ? 'mode-btn active' : 'mode-btn';
+    document.getElementById('t-study').className = m === 'study' ? 'mode-btn active' : 'mode-btn';
+    
+    // Update Labels
+    document.getElementById('lbl-cat').innerText = m === 'work' ? T[lang].l_cat : T[lang].l_cat_s;
+    document.getElementById('lbl-job').innerText = m === 'work' ? T[lang].l_job : T[lang].l_job_s;
+
+    // Filter Categories
+    const catSel = document.getElementById('inp-category');
+    catSel.innerHTML = "";
+    Object.keys(DB).forEach(k => {
+        if (DB[k].type === m) {
+            let opt = document.createElement('option');
+            opt.value = k;
+            opt.innerText = DB[k][lang];
+            catSel.appendChild(opt);
+        }
+    });
+    updateSubSelect();
+}
+
+function updateSubSelect() {
+    const cat = document.getElementById('inp-category').value;
+    const jobSel = document.getElementById('inp-job');
+    jobSel.innerHTML = "";
+    if (!cat || !DB[cat]) return;
+    const jobs = DB[cat].jobs;
+    Object.keys(jobs).forEach(k => {
+        let opt = document.createElement('option');
+        opt.value = k;
+        opt.innerText = jobs[k][lang];
+        jobSel.appendChild(opt);
+    });
+}
+
+function setLang(l, reload=true) {
+    lang = l; localStorage.setItem('rpg_lang', l);
+    document.getElementById('btn-es').classList.toggle('active', l==='es');
+    document.getElementById('btn-en').classList.toggle('active', l==='en');
+    document.querySelectorAll('[data-t]').forEach(e => e.innerText = T[l][e.dataset.t]);
+    if(reload) location.reload();
+}
+
+function startGame() {
+    const n = document.getElementById('inp-name').value;
+    if(!n) return alert("Name required");
+    player.name = n;
+    const clanIdx = document.getElementById('inp-clan').value;
+    player.clan = T[lang].clans[clanIdx];
+    player.cat = document.getElementById('inp-category').value;
+    player.job = document.getElementById('inp-job').value;
+    save(); initGame();
+}
+
+function initGame() {
+    document.getElementById('screen-create').classList.remove('active');
+    document.getElementById('screen-game').classList.add('active');
+    renderUI();
+}
+
+function renderUI() {
+    document.getElementById('ui-name').innerText = player.name;
+    let jobName = player.job;
+    if(DB[player.cat] && DB[player.cat].jobs[player.job]) {
+        jobName = DB[player.cat].jobs[player.job][lang];
+    }
+    document.getElementById('ui-job').innerText = jobName;
+    document.getElementById('ui-clan').innerText = player.clan.split(' ')[0] + " " + player.clan.split(' ')[1]; 
+    document.getElementById('ui-lvl').innerText = player.lvl;
+    document.getElementById('v-str').innerText = player.stats.str;
+    document.getElementById('v-cha').innerText = player.stats.cha;
+    document.getElementById('v-int').innerText = player.stats.int;
+    
+    const pct = (player.xp / player.next)*100;
+    document.getElementById('ui-xp').style.width = pct+"%";
+    document.getElementById('ui-xp-txt').innerText = Math.floor(player.xp)+"/"+player.next;
+    document.getElementById('reset-hint').innerText = player.name;
+
+    renderMissions();
+}
+
+function renderMissions() {
+    const area = document.getElementById('missions-area');
+    area.innerHTML = "";
+    let missions = [];
+    if(DB[player.cat] && DB[player.cat].jobs[player.job]) {
+        missions = DB[player.cat].jobs[player.job].m;
+    }
+
+    ['str', 'cha', 'int'].forEach(stat => {
+        const group = document.createElement('div');
+        group.className = 'm-group';
+        const title = document.createElement('div');
+        title.className = 'm-head';
+        title.innerText = T[lang]['s_'+stat];
+        group.appendChild(title);
+        
+        missions.filter(m => m.s === stat).forEach(m => {
+            const btn = document.createElement('div');
+            btn.className = 'm-btn';
+            btn.onclick = () => gain(m.xp, m.s);
+            btn.innerHTML = `
+                <div class="m-info">
+                    <span class="m-title">${lang==='es'?m.t_es:m.t_en}</span>
+                    <span class="m-desc">${lang==='es'?m.d_es:m.d_en}</span>
+                </div>
+                <div class="xp-badge">+${m.xp}</div>
+            `;
+            group.appendChild(btn);
+        });
+        area.appendChild(group);
+    });
+}
+
+function gain(xp, stat) {
+    player.xp += xp; player.stats[stat]++;
+    let msg = `+${xp} XP`;
+    if(player.xp >= player.next) {
+        player.lvl++; player.xp -= player.next; player.next = Math.floor(player.next*1.2);
+        msg = "🎉 LEVEL UP!";
+    }
+    save(); renderUI(); toast(msg);
+}
+
+function toast(m) {
+    const t = document.getElementById('toast');
+    t.innerText = m; t.style.opacity=1; t.style.bottom="40px";
+    setTimeout(()=>{t.style.opacity=0; t.style.bottom="30px"}, 2000);
+}
+
+function save() { localStorage.setItem('rpg_save_v6', JSON.stringify(player)); }
+function openReset() { document.getElementById('modal-reset').style.display='flex'; }
+function closeReset() { document.getElementById('modal-reset').style.display='none'; }
+function confirmReset() {
+    if(document.getElementById('inp-reset').value === player.name) {
+        localStorage.removeItem('rpg_save_v6'); location.reload();
+    } else alert("Name error");
+}
+</script>
 </body>
 </html>
