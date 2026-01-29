@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RPG Life: Scholar Edition</title>
+    <title>RPG Life: Stable Edition</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --primary: #3b82f6; --accent: #8b5cf6; --gold: #f59e0b; --danger: #ef4444; --text: #f8fafc; --muted: #94a3b8; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 100%; max-width: 420px; position: relative; }
         
-        /* UI Components */
+        /* Language & UI */
         .lang-switch { position: absolute; top: -35px; right: 0; display: flex; gap: 5px; }
         .lang-btn { background: var(--card); border: 1px solid #334155; color: var(--muted); padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
@@ -28,12 +28,12 @@
         /* MODE TOGGLE */
         .mode-toggle { display: flex; background: var(--card); border-radius: 10px; padding: 4px; margin-bottom: 20px; border: 1px solid #334155; }
         .mode-btn { flex: 1; border: none; background: none; color: var(--muted); padding: 10px; font-weight: bold; font-size: 13px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
-        .mode-btn.active { background: var(--primary); color: white; shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .mode-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         /* Profile */
         .profile-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid #334155; position: relative; margin-bottom: 20px; }
         .clan-tag { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 10px; color: var(--accent); border: 1px solid var(--accent); }
-        .char-name { font-size: 22px; font-weight: 800; }
+        .char-name { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
         .char-job { color: var(--muted); font-size: 13px; display: block; margin-bottom: 10px; }
         
         .level-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; font-size: 12px; color: var(--muted); }
@@ -60,16 +60,24 @@
         .m-info { flex: 1; margin-right: 10px; }
         .m-title { font-size: 14px; font-weight: 600; display: block; }
         .m-desc { font-size: 11px; color: var(--muted); font-style: italic; }
-        .xp-badge { background: rgba(255,255,255,0.05); padding: 5px 8px; border-radius: 6px; font-size: 11px; color: var(--gold); font-weight: bold; }
+        .xp-badge { background: rgba(255,255,255,0.05); padding: 5px 8px; border-radius: 6px; font-size: 11px; color: var(--gold); font-weight: bold; min-width: 45px; text-align: center; }
 
         /* Toast & Modal */
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; padding: 8px 16px; border-radius: 20px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 99; width: 80%; text-align: center; }
         .settings-link { display: block; text-align: center; color: #475569; font-size: 12px; text-decoration: underline; margin-top: 20px; cursor: pointer; }
         .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
         .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 100%; max-width: 320px; text-align: center; border: 1px solid var(--danger); }
+        
+        #error-msg { display:none; color:red; text-align:center; padding:20px; background:white; position:fixed; top:0; left:0; width:100%; z-index:9999; }
     </style>
 </head>
 <body>
+
+<div id="error-msg">
+    <h2>Algo salió mal 😔</h2>
+    <p>Hubo un error cargando tus datos.</p>
+    <button onclick="localStorage.clear(); location.reload()">🚨 CLIC PARA REPARAR (BORRAR DATOS)</button>
+</div>
 
 <div class="container">
     <div class="lang-switch">
@@ -138,9 +146,14 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* --- BASE DE DATOS (WORK + STUDENT) --- */
+// --- CONTROL DE ERRORES ---
+window.onerror = function() {
+    document.getElementById('error-msg').style.display = 'block';
+};
+
+/* --- BASE DE DATOS --- */
 const DB = {
-    // --- WORK SECTOR ---
+    // TRABAJO
     cat_trades: {
         type: 'work', es: "Oficios / Manual", en: "Trades / Manual",
         jobs: {
@@ -159,6 +172,13 @@ const DB = {
                     {s:'str', xp:120, t_es:"Instalación", d_es:"Montar unidad", t_en:"Install", d_en:"Mount unit"},
                     {s:'int', xp:200, t_es:"Diagnóstico", d_es:"Encontrar falla eléctrica", t_en:"Diagnosis", d_en:"Find elec fault"}
                 ]
+            },
+            general_trade: {
+                es: "Contratista General", en: "General Contractor",
+                m: [
+                    {s:'str', xp:150, t_es:"Día de Obra", d_es:"8 horas de labor", t_en:"Site Day", d_en:"8 hours labor"},
+                    {s:'cha', xp:200, t_es:"Cliente Feliz", d_es:"Aprobación final de obra", t_en:"Happy Client", d_en:"Final sign-off"}
+                ]
             }
         }
     },
@@ -169,7 +189,8 @@ const DB = {
                 es: "Programador", en: "Developer",
                 m: [
                     {s:'str', xp:100, t_es:"Deep Work", d_es:"1h código puro", t_en:"Deep Work", d_en:"1h pure code"},
-                    {s:'int', xp:150, t_es:"Debuguear", d_es:"Arreglar bug difícil", t_en:"Debug", d_en:"Fix tough bug"}
+                    {s:'int', xp:150, t_es:"Debuguear", d_es:"Arreglar bug difícil", t_en:"Debug", d_en:"Fix tough bug"},
+                    {s:'str', xp:300, t_es:"Deploy", d_es:"Subir a producción", t_en:"Deploy", d_en:"Push to prod"}
                 ]
             }
         }
@@ -187,103 +208,91 @@ const DB = {
             }
         }
     },
-    // --- STUDENT SECTOR ---
+    // ESTUDIO
     stu_hs: {
         type: 'study', es: "Escuela / Secundaria", en: "High School",
         jobs: {
             general_hs: {
-                es: "Estudiante General", en: "General Student",
+                es: "Estudiante", en: "Student",
                 m: [
-                    {s:'str', xp:100, t_es:"Tarea Completa", d_es:"Sin copiar y a tiempo", t_en:"Homework Done", d_en:"No copying, on time"},
-                    {s:'str', xp:150, t_es:"Entreno/Deporte", d_es:"1h de actividad física", t_en:"Sports/Gym", d_en:"1h physical activity"},
-                    {s:'cha', xp:100, t_es:"Participación", d_es:"Levantar mano en clase 3 veces", t_en:"Participation", d_en:"Raise hand 3 times"},
-                    {s:'cha', xp:200, t_es:"Líder de Grupo", d_es:"Organizar el equipo de trabajo", t_en:"Group Leader", d_en:"Organize the team"},
-                    {s:'int', xp:150, t_es:"Examen Sorpresa", d_es:"Aprobar quiz inesperado", t_en:"Pop Quiz", d_en:"Pass surprise test"},
-                    {s:'int', xp:300, t_es:"Examen Final", d_es:"Sacar nota perfecta (A)", t_en:"Final Exam", d_en:"Get perfect grade (A)"}
+                    {s:'str', xp:100, t_es:"Tarea Completa", d_es:"A tiempo y bien hecha", t_en:"Homework Done", d_en:"On time & good"},
+                    {s:'str', xp:150, t_es:"Deporte/Gym", d_es:"1h actividad física", t_en:"Sports/Gym", d_en:"1h physical activity"},
+                    {s:'int', xp:300, t_es:"Aprobar Examen", d_es:"Nota alta en prueba", t_en:"Pass Exam", d_en:"High score test"}
                 ]
             }
         }
     },
     stu_uni: {
-        type: 'study', es: "Universidad / College", en: "University / College",
+        type: 'study', es: "Universidad / College", en: "University",
         jobs: {
-            science: {
+            stem: {
                 es: "Ciencias / Ingeniería", en: "STEM Major",
                 m: [
-                    {s:'str', xp:200, t_es:"Laboratorio", d_es:"Completar reporte de lab", t_en:"Lab Report", d_en:"Finish lab report"},
-                    {s:'int', xp:100, t_es:"Problemas", d_es:"Resolver set de ejercicios", t_en:"Problem Set", d_en:"Solve exercises"},
-                    {s:'int', xp:300, t_es:"Parcial / Midterm", d_es:"Aprobar examen mayor", t_en:"Midterm", d_en:"Pass major exam"}
+                    {s:'str', xp:200, t_es:"Laboratorio", d_es:"Reporte completado", t_en:"Lab Report", d_en:"Finished report"},
+                    {s:'int', xp:100, t_es:"Problemas", d_es:"Set de ejercicios", t_en:"Problem Set", d_en:"Exercises done"},
+                    {s:'int', xp:300, t_es:"Parcial / Midterm", d_es:"Examen aprobado", t_en:"Midterm", d_en:"Exam passed"}
                 ]
             },
             arts: {
                 es: "Humanidades / Artes", en: "Arts / Humanities",
                 m: [
-                    {s:'str', xp:150, t_es:"Lectura Masiva", d_es:"Leer 50+ páginas 1 sesión", t_en:"Heavy Reading", d_en:"Read 50+ pages 1 sitting"},
-                    {s:'int', xp:250, t_es:"Ensayo", d_es:"Escribir paper de 5+ pág", t_en:"Essay", d_en:"Write 5+ page paper"},
-                    {s:'cha', xp:200, t_es:"Debate", d_es:"Defender tesis en clase", t_en:"Debate", d_en:"Defend thesis in class"}
-                ]
-            }
-        }
-    },
-    stu_self: {
-        type: 'study', es: "Autodidacta / Bootcamp", en: "Self-Taught / Bootcamp",
-        jobs: {
-            code: {
-                es: "Coding Bootcamp", en: "Coding Bootcamp",
-                m: [
-                    {s:'str', xp:150, t_es:"Tutorial Hell", d_es:"Completar curso de 2h", t_en:"Tutorial", d_en:"Finish 2h course"},
-                    {s:'int', xp:300, t_es:"Proyecto Capstone", d_es:"Construir app portfolio", t_en:"Capstone", d_en:"Build portfolio app"},
-                    {s:'cha', xp:100, t_es:"Discord Help", d_es:"Ayudar a un compañero", t_en:"Discord Help", d_en:"Help a peer"}
+                    {s:'str', xp:150, t_es:"Lectura Intensa", d_es:"50+ páginas leídas", t_en:"Heavy Reading", d_en:"50+ pages read"},
+                    {s:'int', xp:250, t_es:"Ensayo", d_es:"Escribir 5 páginas", t_en:"Essay", d_en:"Write 5 pages"}
                 ]
             }
         }
     }
 };
 
-/* --- UI TEXTS --- */
+/* --- TEXTOS --- */
 const T = {
-    es: { t_create:"CREA TU PERFIL", l_name:"Nombre", l_clan:"Clan", l_cat:"Industria", l_cat_s:"Nivel Educativo", l_job:"Especialidad", l_job_s:"Carrera / Enfoque", b_start:"EMPEZAR", l_lvl:"Nivel", s_str:"FUERZA", s_cha:"CARISMA", s_int:"MENTE", b_reset:"Reiniciar Todo", t_danger:"ZONA DE PELIGRO", d_reset:"Escribe tu nombre para borrar:", b_del:"BORRAR", clans:["🦁 Leones (Líderes)","🦊 Diplomáticos (Social)","🔮 Magos (Creativos)","🐍 Serpientes (Estrategia)","🐐 Montañeses (Resistencia)"] },
-    en: { t_create:"CREATE PROFILE", l_name:"Name", l_clan:"Clan", l_cat:"Industry", l_cat_s:"Education Level", l_job:"Specialty", l_job_s:"Major / Focus", b_start:"START", l_lvl:"Level", s_str:"STRENGTH", s_cha:"CHARISMA", s_int:"MIND", b_reset:"Reset All", t_danger:"DANGER ZONE", d_reset:"Type name to delete:", b_del:"DELETE", clans:["🦁 Lions (Leaders)","🦊 Diplomats (Social)","🔮 Mages (Creatives)","🐍 Serpents (Strategy)","🐐 Mountaineers (Stamina)"] }
+    es: { t_create:"CREA TU PERFIL", l_name:"Nombre", l_clan:"Clan", l_cat:"Industria", l_cat_s:"Nivel Educativo", l_job:"Especialidad", l_job_s:"Carrera", b_start:"EMPEZAR", l_lvl:"Nivel", s_str:"FUERZA", s_cha:"CARISMA", s_int:"MENTE", b_reset:"Reiniciar Todo", t_danger:"ZONA DE PELIGRO", d_reset:"Escribe tu nombre para borrar:", b_del:"BORRAR", clans:["🦁 Leones (Líderes)","🦊 Diplomáticos (Social)","🔮 Magos (Creativos)","🐍 Serpientes (Estrategia)","🐐 Montañeses (Resistencia)"] },
+    en: { t_create:"CREATE PROFILE", l_name:"Name", l_clan:"Clan", l_cat:"Industry", l_cat_s:"Education Level", l_job:"Specialty", l_job_s:"Major", b_start:"START", l_lvl:"Level", s_str:"STRENGTH", s_cha:"CHARISMA", s_int:"MIND", b_reset:"Reset All", t_danger:"DANGER ZONE", d_reset:"Type name to delete:", b_del:"DELETE", clans:["🦁 Lions (Leaders)","🦊 Diplomats (Social)","🔮 Mages (Creatives)","🐍 Serpents (Strategy)","🐐 Mountaineers (Stamina)"] }
 };
 
 let lang = 'es';
-let mode = 'work'; // 'work' or 'study'
+let mode = 'work';
 let player = { name:"", clan:"", cat:"", job:"", lvl:1, xp:0, next:1000, stats:{str:0, cha:0, int:0} };
 
 window.onload = () => {
-    lang = localStorage.getItem('rpg_lang') || 'es';
-    setLang(lang, false);
-    
-    // Cargar Clan
-    const clanSel = document.getElementById('inp-clan');
-    clanSel.innerHTML = "";
-    T[lang].clans.forEach((c, i) => {
-        let opt = document.createElement('option');
-        opt.value = i; opt.innerText = c; clanSel.appendChild(opt);
-    });
+    try {
+        lang = localStorage.getItem('rpg_lang') || 'es';
+        setLang(lang, false);
+        
+        // Cargar Clanes
+        const clanSel = document.getElementById('inp-clan');
+        clanSel.innerHTML = "";
+        T[lang].clans.forEach((c, i) => {
+            let opt = document.createElement('option');
+            opt.value = i; opt.innerText = c; clanSel.appendChild(opt);
+        });
 
-    // Check Save
-    const save = localStorage.getItem('rpg_save_v6');
-    if(save) {
-        player = JSON.parse(save);
-        initGame();
-    } else {
-        document.getElementById('screen-create').classList.add('active');
-        setMode('work'); // Default init
+        // Cargar Jugador
+        const save = localStorage.getItem('rpg_save_stable');
+        if(save) {
+            player = JSON.parse(save);
+            // Verificar integridad de datos
+            if(!player.stats) player.stats = {str:0, cha:0, int:0};
+            initGame();
+        } else {
+            document.getElementById('screen-create').classList.add('active');
+            setMode('work');
+        }
+    } catch (e) {
+        console.error(e);
+        localStorage.clear(); // Si falla, limpiar para evitar bloqueo
+        location.reload();
     }
 };
 
 function setMode(m) {
     mode = m;
-    // Toggle Buttons Visual
     document.getElementById('t-work').className = m === 'work' ? 'mode-btn active' : 'mode-btn';
     document.getElementById('t-study').className = m === 'study' ? 'mode-btn active' : 'mode-btn';
     
-    // Update Labels
     document.getElementById('lbl-cat').innerText = m === 'work' ? T[lang].l_cat : T[lang].l_cat_s;
     document.getElementById('lbl-job').innerText = m === 'work' ? T[lang].l_job : T[lang].l_job_s;
 
-    // Filter Categories
     const catSel = document.getElementById('inp-category');
     catSel.innerHTML = "";
     Object.keys(DB).forEach(k => {
@@ -301,21 +310,24 @@ function updateSubSelect() {
     const cat = document.getElementById('inp-category').value;
     const jobSel = document.getElementById('inp-job');
     jobSel.innerHTML = "";
-    if (!cat || !DB[cat]) return;
-    const jobs = DB[cat].jobs;
-    Object.keys(jobs).forEach(k => {
-        let opt = document.createElement('option');
-        opt.value = k;
-        opt.innerText = jobs[k][lang];
-        jobSel.appendChild(opt);
-    });
+    if (cat && DB[cat]) {
+        const jobs = DB[cat].jobs;
+        Object.keys(jobs).forEach(k => {
+            let opt = document.createElement('option');
+            opt.value = k;
+            opt.innerText = jobs[k][lang];
+            jobSel.appendChild(opt);
+        });
+    }
 }
 
 function setLang(l, reload=true) {
     lang = l; localStorage.setItem('rpg_lang', l);
     document.getElementById('btn-es').classList.toggle('active', l==='es');
     document.getElementById('btn-en').classList.toggle('active', l==='en');
-    document.querySelectorAll('[data-t]').forEach(e => e.innerText = T[l][e.dataset.t]);
+    document.querySelectorAll('[data-t]').forEach(e => {
+        if(T[l][e.dataset.t]) e.innerText = T[l][e.dataset.t];
+    });
     if(reload) location.reload();
 }
 
@@ -339,11 +351,15 @@ function initGame() {
 function renderUI() {
     document.getElementById('ui-name').innerText = player.name;
     let jobName = player.job;
-    if(DB[player.cat] && DB[player.cat].jobs[player.job]) {
-        jobName = DB[player.cat].jobs[player.job][lang];
-    }
+    // Intentar traducir trabajo
+    try {
+        if(DB[player.cat] && DB[player.cat].jobs[player.job]) {
+            jobName = DB[player.cat].jobs[player.job][lang];
+        }
+    } catch(e) { jobName = player.job; }
+    
     document.getElementById('ui-job').innerText = jobName;
-    document.getElementById('ui-clan').innerText = player.clan.split(' ')[0] + " " + player.clan.split(' ')[1]; 
+    document.getElementById('ui-clan').innerText = player.clan ? (player.clan.split(' ')[0] + " " + player.clan.split(' ')[1]) : "Clan"; 
     document.getElementById('ui-lvl').innerText = player.lvl;
     document.getElementById('v-str').innerText = player.stats.str;
     document.getElementById('v-cha').innerText = player.stats.cha;
@@ -361,6 +377,7 @@ function renderMissions() {
     const area = document.getElementById('missions-area');
     area.innerHTML = "";
     let missions = [];
+    
     if(DB[player.cat] && DB[player.cat].jobs[player.job]) {
         missions = DB[player.cat].jobs[player.job].m;
     }
@@ -373,7 +390,12 @@ function renderMissions() {
         title.innerText = T[lang]['s_'+stat];
         group.appendChild(title);
         
-        missions.filter(m => m.s === stat).forEach(m => {
+        const statMissions = missions.filter(m => m.s === stat);
+        if(statMissions.length === 0) {
+           // Si no hay misiones para este stat, poner placeholder vacío o genérico (opcional)
+        }
+
+        statMissions.forEach(m => {
             const btn = document.createElement('div');
             btn.className = 'm-btn';
             btn.onclick = () => gain(m.xp, m.s);
@@ -406,13 +428,13 @@ function toast(m) {
     setTimeout(()=>{t.style.opacity=0; t.style.bottom="30px"}, 2000);
 }
 
-function save() { localStorage.setItem('rpg_save_v6', JSON.stringify(player)); }
+function save() { localStorage.setItem('rpg_save_stable', JSON.stringify(player)); }
 function openReset() { document.getElementById('modal-reset').style.display='flex'; }
 function closeReset() { document.getElementById('modal-reset').style.display='none'; }
 function confirmReset() {
     if(document.getElementById('inp-reset').value === player.name) {
-        localStorage.removeItem('rpg_save_v6'); location.reload();
-    } else alert("Name error");
+        localStorage.removeItem('rpg_save_stable'); location.reload();
+    } else alert("Error");
 }
 </script>
 </body>
