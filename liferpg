@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RPG Life: Realism v9</title>
+    <title>RPG Life: Archetypes v10</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --primary: #3b82f6; --accent: #8b5cf6; --gold: #f59e0b; --danger: #ef4444; --text: #f8fafc; --muted: #94a3b8; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 100%; max-width: 420px; position: relative; padding-bottom: 50px; }
         
-        /* LANGUAGE */
         .lang-switch { position: absolute; top: -35px; right: 0; display: flex; gap: 5px; }
         .lang-btn { background: var(--card); border: 1px solid #334155; color: var(--muted); padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
@@ -24,18 +23,15 @@
         select:focus, input:focus { border-color: var(--primary); }
         
         .btn-main { background: linear-gradient(135deg, var(--primary), var(--accent)); width: 100%; padding: 14px; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; transition: 0.2s; }
-        .btn-main:active { transform: scale(0.98); opacity: 0.9; }
-
-        /* MODE TOGGLE */
+        
         .mode-toggle { display: flex; background: var(--card); border-radius: 10px; padding: 4px; margin-bottom: 20px; border: 1px solid #334155; }
         .mode-btn { flex: 1; border: none; background: none; color: var(--muted); padding: 10px; font-weight: bold; font-size: 13px; cursor: pointer; border-radius: 8px; }
         .mode-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        /* CUSTOM AREA */
+        /* CUSTOM AREA STYLES */
         #custom-area { display: none; background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 10px; border: 1px dashed var(--primary); margin-bottom: 15px; }
         #custom-area.show { display: block; animation: fade 0.3s; }
 
-        /* PROFILE */
         .profile-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid #334155; position: relative; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
         .clan-tag { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 10px; color: var(--accent); border: 1px solid var(--accent); }
         .char-name { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
@@ -46,14 +42,12 @@
         .xp-bar-bg { background: #0f172a; height: 10px; border-radius: 5px; overflow: hidden; border: 1px solid #334155; }
         .xp-bar-fill { background: linear-gradient(90deg, var(--gold), #fcd34d); height: 100%; width: 0%; transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
 
-        /* STATS */
         .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
         .stat-box { background: #0f172a; padding: 12px 5px; border-radius: 10px; text-align: center; border: 1px solid #334155; }
         .s-val { font-size: 22px; font-weight: bold; display: block; line-height: 1.1; }
         .s-lbl { font-size: 9px; color: var(--muted); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
         .c-str { color: #ef4444; } .c-cha { color: #f472b6; } .c-int { color: #3b82f6; }
 
-        /* MISSIONS */
         .m-group { margin-bottom: 15px; }
         .m-head { font-size: 10px; color: var(--muted); font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #334155; margin-bottom: 8px; padding-bottom: 4px; letter-spacing: 1px; }
         .m-btn { 
@@ -67,7 +61,6 @@
         .m-desc { font-size: 11px; color: var(--muted); }
         .xp-badge { background: rgba(255,255,255,0.08); padding: 6px 10px; border-radius: 8px; font-size: 12px; color: var(--gold); font-weight: bold; min-width: 50px; text-align: center; }
 
-        /* UTILS */
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; padding: 10px 20px; border-radius: 30px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 99; width: 80%; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .settings-link { display: block; text-align: center; color: #475569; font-size: 12px; text-decoration: underline; margin-top: 20px; cursor: pointer; padding: 10px; }
         .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
@@ -106,8 +99,16 @@
         <select id="inp-job" onchange="checkCustomJob()"></select>
 
         <div id="custom-area">
-            <label style="color:var(--primary)">✨ <span data-t="l_custom">Escribe tu Rol Exacto:</span></label>
-            <input type="text" id="inp-custom-text" placeholder="...">
+            <label style="color:var(--primary)">1. Escribe tu Rol:</label>
+            <input type="text" id="inp-custom-text" placeholder="Ej: Chef, Carpintero...">
+            
+            <label style="color:var(--primary)">2. ¿Cómo es tu trabajo?:</label>
+            <select id="inp-custom-type">
+                <option value="manual">🔨 Manual / Artesano (Chef, Carpintero)</option>
+                <option value="office">💻 Oficina / Mental (Contador, Writer)</option>
+                <option value="service">🤝 Servicio / Gente (Mesero, Recepción)</option>
+                <option value="action">⚡ Físico / Acción (Bombero, Atleta)</option>
+            </select>
         </div>
 
         <button class="btn-main" onclick="startGame()" data-t="b_start">COMENZAR AVENTURA</button>
@@ -152,65 +153,47 @@
 
 <script>
 /* =========================================
-   BASE DE DATOS OPTIMIZADA
+   BASE DE DATOS V10
    ========================================= */
 const DB = {
     // === TRABAJO (Predefinidos) ===
     w_trades: {
         type: 'work', es: "Oficios / Construcción", en: "Trades / Construction",
         jobs: {
-            cleaning: { es: "Limpieza / Pressure Washing", en: "Pressure Washing", m: [{s:'str',xp:100,t_es:"Mantenimiento Equipo",d_es:"Limpiar filtros/Aceite",t_en:"Gear Maint",d_en:"Clean filters/Oil"},{s:'str',xp:300,t_es:"Trabajo Facturable",d_es:"Completar servicio completo",t_en:"Billable Job",d_en:"Complete full service"},{s:'cha',xp:150,t_es:"Foto Portfolio",d_es:"Antes/Después para redes",t_en:"Portfolio Pic",d_en:"Before/After for social"},{s:'int',xp:200,t_es:"Cotización Precisa",d_es:"Medir y calcular margen",t_en:"Accurate Quote",d_en:"Measure & calc margin"}] },
-            mechanic: { es: "Mecánica Automotriz", en: "Mechanic", m: [{s:'str',xp:150,t_es:"Servicio Rápido",d_es:"Aceite/Frenos (1h)",t_en:"Quick Service",d_en:"Oil/Brakes (1h)"},{s:'int',xp:250,t_es:"Diagnóstico Complejo",d_es:"Hallar falla eléctrica/motor",t_en:"Diagnosis",d_en:"Find elec/engine fault"},{s:'cha',xp:100,t_es:"Asesoría Cliente",d_es:"Explicar reparación honestamente",t_en:"Client Advice",d_en:"Explain fix honestly"}] },
-            construction: { es: "Construcción General", en: "Construction", m: [{s:'str',xp:200,t_es:"Jornada Completa",d_es:"8h labor física intensa",t_en:"Full Day",d_en:"8h heavy labor"},{s:'int',xp:150,t_es:"Lectura de Planos",d_es:"Interpretar medidas exactas",t_en:"Blueprints",d_en:"Read exact specs"},{s:'cha',xp:150,t_es:"Reporte Avance",d_es:"Confirmar con jefe/cliente",t_en:"Status Report",d_en:"Confirm w/ boss"}] },
-            electric: { es: "Electricista", en: "Electrician", m: [{s:'str',xp:150,t_es:"Cableado Nuevo",d_es:"Instalar línea/circuito",t_en:"New Wiring",d_en:"Install line/circuit"},{s:'int',xp:100,t_es:"Protocolo Seguridad",d_es:"Testear tierra/fugas",t_en:"Safety Check",d_en:"Test ground/leaks"}] },
-            beauty: { es: "Belleza / Barbería", en: "Beauty / Barber", m: [{s:'str',xp:100,t_es:"Maratón de Pie",d_es:"3 clientes seguidos",t_en:"Standing Marathon",d_en:"3 clients in a row"},{s:'cha',xp:200,t_es:"Escucha Activa",d_es:"Conversación empática",t_en:"Active Listen",d_en:"Empathetic chat"},{s:'int',xp:150,t_es:"Tendencia",d_es:"Estudiar nuevo estilo",t_en:"Trend Study",d_en:"Learn new style"}] },
-            driver: { es: "Transporte / Chofer", en: "Driver", m: [{s:'str',xp:200,t_es:"Ruta Larga",d_es:"4h+ conducción segura",t_en:"Long Route",d_en:"4h+ safe drive"},{s:'int',xp:100,t_es:"Logística",d_es:"Optimizar ruta/gasolina",t_en:"Logistics",d_en:"Optimize route/gas"}] },
-            food: { es: "Gastronomía", en: "Culinary", m: [{s:'str',xp:200,t_es:"Servicio (Rush)",d_es:"Hora pico sin errores",t_en:"Service Rush",d_en:"Peak hour 0 errors"},{s:'int',xp:100,t_es:"Mise en place",d_es:"Organizar estación 100%",t_en:"Mise en place",d_en:"Organize station 100%"}] }
+            cleaning: { es: "Limpieza / PW", en: "Pressure Washing", m: [{s:'str',xp:100,t_es:"Prep. Equipo",d_es:"Mezclar químicos/Aceite",t_en:"Prep Gear",d_en:"Mix chems/Oil"},{s:'str',xp:300,t_es:"Trabajo Facturable",d_es:"Completar servicio",t_en:"Billable Job",d_en:"Complete service"},{s:'cha',xp:150,t_es:"Foto Portfolio",d_es:"Antes/Después",t_en:"Portfolio Pic",d_en:"Before/After"},{s:'int',xp:200,t_es:"Cotización",d_es:"Medir y calcular",t_en:"Quote",d_en:"Measure & calc"}] },
+            mechanic: { es: "Mecánica", en: "Mechanic", m: [{s:'str',xp:150,t_es:"Servicio Rápido",d_es:"Aceite/Frenos (1h)",t_en:"Quick Service",d_en:"Oil/Brakes (1h)"},{s:'int',xp:250,t_es:"Diagnóstico",d_es:"Hallar falla exacta",t_en:"Diagnosis",d_en:"Find exact fault"},{s:'cha',xp:100,t_es:"Asesoría",d_es:"Explicar reparación",t_en:"Advice",d_en:"Explain fix"}] },
+            construction: { es: "Construcción", en: "Construction", m: [{s:'str',xp:200,t_es:"Jornada Dura",d_es:"8h labor física",t_en:"Hard Day",d_en:"8h heavy labor"},{s:'int',xp:150,t_es:"Lectura Planos",d_es:"Medidas exactas",t_en:"Blueprints",d_en:"Read specs"},{s:'cha',xp:150,t_es:"Reporte",d_es:"Confirmar avance",t_en:"Report",d_en:"Confirm progress"}] },
+            food: { es: "Gastronomía", en: "Culinary", m: [{s:'str',xp:200,t_es:"Servicio (Rush)",d_es:"Hora pico 0 errores",t_en:"Service Rush",d_en:"Peak hour 0 errors"},{s:'str',xp:100,t_es:"Mise en place",d_es:"Organizar estación",t_en:"Mise en place",d_en:"Organize station"}] }
         }
     },
     w_corp: {
         type: 'work', es: "Oficina / Negocios", en: "Corporate / Business",
         jobs: {
-            sales: { es: "Ventas / Sales", en: "Sales", m: [{s:'cha',xp:100,t_es:"Prospección",d_es:"10 llamadas/emails",t_en:"Prospecting",d_en:"10 calls/emails"},{s:'cha',xp:500,t_es:"CERRAR TRATO",d_es:"Contrato firmado/Pago",t_en:"CLOSE DEAL",d_en:"Contract signed"},{s:'int',xp:100,t_es:"CRM Admin",d_es:"Actualizar leads",t_en:"CRM Admin",d_en:"Update leads"}] },
-            marketing: { es: "Marketing", en: "Marketing", m: [{s:'int',xp:150,t_es:"Análisis Métricas",d_es:"Revisar ROI/KPIs",t_en:"Metrics",d_en:"Check ROI/KPIs"},{s:'cha',xp:200,t_es:"Crear Campaña",d_es:"Lanzar ads/contenido",t_en:"Launch Campaign",d_en:"Launch ads/content"}] },
-            admin: { es: "Administración", en: "Admin", m: [{s:'int',xp:100,t_es:"Inbox Zero",d_es:"Procesar todos los emails",t_en:"Inbox Zero",d_en:"Process all emails"},{s:'cha',xp:150,t_es:"Gestión Reuniones",d_es:"Coordinar agendas complejas",t_en:"Meeting Mgmt",d_en:"Coordinate complex agenda"}] }
+            sales: { es: "Ventas", en: "Sales", m: [{s:'cha',xp:100,t_es:"Prospección",d_es:"10 llamadas/emails",t_en:"Prospecting",d_en:"10 calls/emails"},{s:'cha',xp:500,t_es:"CERRAR TRATO",d_es:"Contrato firmado",t_en:"CLOSE DEAL",d_en:"Contract signed"},{s:'int',xp:100,t_es:"CRM Admin",d_es:"Actualizar leads",t_en:"CRM Admin",d_en:"Update leads"}] },
+            admin: { es: "Administración", en: "Admin", m: [{s:'int',xp:100,t_es:"Inbox Zero",d_es:"Procesar emails",t_en:"Inbox Zero",d_en:"Process emails"},{s:'cha',xp:150,t_es:"Gestión",d_es:"Coordinar agendas",t_en:"Mgmt",d_en:"Coordinate agenda"}] }
         }
     },
     w_tech: {
-        type: 'work', es: "Tecnología / IT", en: "Technology",
+        type: 'work', es: "Tecnología", en: "Technology",
         jobs: {
-            dev: { es: "Desarrollador", en: "Developer", m: [{s:'str',xp:100,t_es:"Deep Work",d_es:"1h código (No distracciones)",t_en:"Deep Work",d_en:"1h code (No distractions)"},{s:'int',xp:150,t_es:"Refactor/Debug",d_es:"Mejorar código existente",t_en:"Refactor",d_en:"Improve existing code"},{s:'str',xp:300,t_es:"Deploy",d_es:"Subir feature a producción",t_en:"Deploy",d_en:"Push feature to prod"}] },
-            data: { es: "Analista de Datos", en: "Data Analyst", m: [{s:'int',xp:200,t_es:"Query Compleja",d_es:"SQL/Python script avanzado",t_en:"Complex Query",d_en:"Adv SQL/Python"},{s:'cha',xp:150,t_es:"Data Storytelling",d_es:"Presentar insights claros",t_en:"Storytelling",d_en:"Present clear insights"}] }
+            dev: { es: "Desarrollador", en: "Developer", m: [{s:'str',xp:100,t_es:"Deep Work",d_es:"1h código puro",t_en:"Deep Work",d_en:"1h pure code"},{s:'int',xp:150,t_es:"Debug",d_es:"Arreglar error",t_en:"Debug",d_en:"Fix bug"},{s:'str',xp:300,t_es:"Deploy",d_es:"Subir a producción",t_en:"Deploy",d_en:"Push to prod"}] }
         }
     },
 
     // === ESTUDIO (Predefinidos) ===
     s_health: {
-        type: 'study', es: "Salud (Medicina/Enfermería)", en: "Health (Med/Nursing)",
+        type: 'study', es: "Salud (Medicina)", en: "Health (Med)",
         jobs: {
-            med: { es: "Medicina", en: "Medicine", m: [{s:'str',xp:300,t_es:"Guardia/Turno",d_es:"Rotación hospitalaria",t_en:"Shift",d_en:"Hospital rotation"},{s:'int',xp:150,t_es:"Flashcards",d_es:"Repasar 50 tarjetas (Anki)",t_en:"Flashcards",d_en:"Review 50 cards"},{s:'cha',xp:100,t_es:"Anamnesis",d_es:"Practicar historia clínica",t_en:"History Taking",d_en:"Practice patient history"}] },
-            psych: { es: "Psicología", en: "Psychology", m: [{s:'int',xp:200,t_es:"Lectura Densa",d_es:"Resumir paper teórico",t_en:"Heavy Reading",d_en:"Summarize theory paper"},{s:'cha',xp:150,t_es:"Roleplay",d_es:"Simular sesión terapéutica",t_en:"Roleplay",d_en:"Simulate session"}] }
+            med: { es: "Medicina", en: "Medicine", m: [{s:'str',xp:300,t_es:"Guardia",d_es:"Rotación hospital",t_en:"Shift",d_en:"Hospital rotation"},{s:'int',xp:150,t_es:"Flashcards",d_es:"Repasar 50 tarjetas",t_en:"Flashcards",d_en:"Review 50 cards"},{s:'cha',xp:100,t_es:"Anamnesis",d_es:"Historia clínica",t_en:"History",d_en:"Patient history"}] }
         }
     },
     s_eng: {
         type: 'study', es: "Ingeniería", en: "Engineering",
         jobs: {
-            general_eng: { es: "Estudiante Ingeniería", en: "Engineering Student", m: [{s:'int',xp:100,t_es:"Problem Set",d_es:"Resolver 10 ejercicios",t_en:"Problem Set",d_en:"Solve 10 problems"},{s:'str',xp:200,t_es:"Proyecto Final",d_es:"Avanzar prototipo/código",t_en:"Capstone",d_en:"Advance prototype"},{s:'int',xp:150,t_es:"Lab Report",d_es:"Documentar experimento",t_en:"Lab Report",d_en:"Document experiment"}] }
+            general_eng: { es: "Ingeniería General", en: "General Eng", m: [{s:'int',xp:100,t_es:"Ejercicios",d_es:"Resolver 10 problemas",t_en:"Problem Set",d_en:"Solve 10 problems"},{s:'str',xp:200,t_es:"Proyecto",d_es:"Avanzar prototipo",t_en:"Project",d_en:"Advance prototype"}] }
         }
     },
-    s_law: {
-        type: 'study', es: "Derecho / Leyes", en: "Law",
-        jobs: {
-            law: { es: "Derecho", en: "Law", m: [{s:'str',xp:200,t_es:"Lectura Casos",d_es:"Leer 3 sentencias completas",t_en:"Read Cases",d_en:"Read 3 full rulings"},{s:'cha',xp:150,t_es:"Debate",d_es:"Argumentar postura legal",t_en:"Moot Court",d_en:"Argue legal point"},{s:'int',xp:100,t_es:"Memorizar",d_es:"Artículos/Códigos",t_en:"Memorize",d_en:"Articles/Codes"}] }
-        }
-    },
-    s_hs: {
-        type: 'study', es: "Secundaria / High School", en: "High School",
-        jobs: {
-            hs: { es: "Estudiante General", en: "Student", m: [{s:'str',xp:100,t_es:"Tarea Completa",d_es:"Sin copiar, a tiempo",t_en:"Homework",d_en:"No copying, on time"},{s:'int',xp:250,t_es:"Aprobar Examen",d_es:"Nota superior al promedio",t_en:"Pass Exam",d_en:"Above average grade"},{s:'str',xp:150,t_es:"Actividad Extra",d_es:"Deporte/Club/Arte (1h)",t_en:"Extra Curricular",d_en:"Sports/Club/Art (1h)"}] }
-        }
-    },
-
+    
     // === OPCIÓN PERSONALIZADA ===
     custom: {
         type: 'any', es: "OTRO / PERSONALIZADO", en: "OTHER / CUSTOM",
@@ -224,7 +207,7 @@ const T = {
     en: { t_create:"CREATE PROFILE", l_name:"Name", l_clan:"Clan", l_cat:"Sector / Faculty", l_job:"Role / Major", b_start:"START", l_lvl:"Level", s_str:"STRENGTH", s_cha:"CHARISMA", s_int:"MIND", b_reset:"Reset All", t_danger:"DANGER ZONE", d_reset:"Type name to delete:", b_del:"DELETE", l_custom:"Type your Exact Role:", clans:["🦁 Lions (Leadership)","🦊 Foxes (Cunning)","🔮 Mages (Creativity)","🐍 Serpents (Ambition)","🐐 Goats (Persistence)"] }
 };
 
-let lang = 'es', mode = 'work', player = { name:"", clan:"", cat:"", job:"", customName:"", lvl:1, xp:0, next:1000, stats:{str:0, cha:0, int:0} };
+let lang = 'es', mode = 'work', player = { name:"", clan:"", cat:"", job:"", customName:"", customType:"", lvl:1, xp:0, next:1000, stats:{str:0, cha:0, int:0} };
 
 window.onload = () => {
     try {
@@ -234,7 +217,7 @@ window.onload = () => {
         clanSel.innerHTML = "";
         T[lang].clans.forEach((c, i) => { let o = document.createElement('option'); o.value = i; o.innerText = c; clanSel.appendChild(o); });
 
-        const save = localStorage.getItem('rpg_save_v9');
+        const save = localStorage.getItem('rpg_save_v10');
         if(save) {
             player = JSON.parse(save);
             if(!player.stats) player.stats = {str:0, cha:0, int:0};
@@ -299,14 +282,16 @@ function startGame() {
     player.clan = T[lang].clans[document.getElementById('inp-clan').value];
     player.cat = document.getElementById('inp-category').value;
     player.job = document.getElementById('inp-job').value;
-    player.mode = mode; // Guardamos el modo elegido (work/study)
+    player.mode = mode;
     
     if(player.cat === 'custom') {
         const cText = document.getElementById('inp-custom-text').value;
         if(!cText) return alert("Role required");
         player.customName = cText;
+        player.customType = document.getElementById('inp-custom-type').value; // GUARDAR EL TIPO
     } else {
         player.customName = "";
+        player.customType = "";
     }
     save(); initGame();
 }
@@ -344,28 +329,39 @@ function renderMissions() {
     let missions = [];
 
     if(player.cat === 'custom') {
-        // === MOTOR DE GENERACIÓN REALISTA V9.0 ===
-        if(player.mode === 'work') {
-            // Misiones Universales de Productividad LABORAL
+        // === MOTOR DE ARQUETIPOS V10 ===
+        const type = player.customType; 
+        
+        if (type === 'manual') { // CHEF, CARPINTERO, PINTOR
             missions = [
-                {s:'str', xp:150, t_es:"Deep Work (90 min)", d_es:"Sin teléfono/distracciones", t_en:"Deep Work (90m)", d_en:"No phone/distractions"},
-                {s:'str', xp:100, t_es:"Comerse la Rana", d_es:"Hacer la tarea más difícil 1ro", t_en:"Eat the Frog", d_en:"Do hardest task 1st"},
-                {s:'int', xp:100, t_es:"Inbox Zero / Orden", d_es:"Limpiar emails o espacio físico", t_en:"Inbox Zero / Tidy", d_en:"Clear emails or space"},
-                {s:'int', xp:200, t_es:"Mejora de Habilidad", d_es:"30 min estudiando tu rubro", t_en:"Skill Up", d_en:"30m study your field"},
-                {s:'cha', xp:150, t_es:"Networking Activo", d_es:"Contactar 3 personas/clientes", t_en:"Active Networking", d_en:"Reach out to 3 people"},
-                {s:'cha', xp:100, t_es:"Reporte de Estado", d_es:"Comunicar avance a equipo", t_en:"Status Update", d_en:"Communicate progress"}
+                {s:'str', xp:100, t_es:"Prep. Herramientas/Ingredientes", d_es:"Organizar todo antes de empezar (Mise en place)", t_en:"Prep Tools/Ingredients", d_en:"Organize everything (Mise en place)"},
+                {s:'str', xp:200, t_es:"Ejecución / Trabajo", d_es:"Periodo de trabajo manual intenso", t_en:"Execution / Labor", d_en:"Intense manual work period"},
+                {s:'int', xp:100, t_es:"Limpieza / Mantenimiento", d_es:"Limpiar área o afilar/reparar equipo", t_en:"Clean / Maintain", d_en:"Clean area or fix gear"},
+                {s:'int', xp:150, t_es:"Control de Calidad", d_es:"Revisar detalle final o sabor", t_en:"Quality Check", d_en:"Check final detail/taste"},
+                {s:'cha', xp:150, t_es:"Coordinación Equipo", d_es:"Comunicar orden o estado", t_en:"Team Sync", d_en:"Communicate order/status"}
             ];
-        } else {
-            // Misiones Universales de ESTUDIO Efectivo
+        } else if (type === 'office') { // CONTADOR, ESCRITOR
             missions = [
-                {s:'str', xp:150, t_es:"Pomodoro (4 ciclos)", d_es:"2 horas de estudio con pausas", t_en:"Pomodoro (4x)", d_en:"2h study with breaks"},
-                {s:'int', xp:100, t_es:"Active Recall", d_es:"Autoevaluación sin mirar notas", t_en:"Active Recall", d_en:"Quiz self no notes"},
-                {s:'int', xp:200, t_es:"Resumen Feynman", d_es:"Explicar tema en lenguaje simple", t_en:"Feynman Tech", d_en:"Explain simply"},
-                {s:'int', xp:150, t_es:"Práctica Deliberada", d_es:"Resolver ejercicios difíciles", t_en:"Practice", d_en:"Do hard exercises"},
-                {s:'cha', xp:150, t_es:"Enseñar a compañero", d_es:"Explicar un tema a otro", t_en:"Teach Peer", d_en:"Explain topic to peer"},
-                {s:'cha', xp:100, t_es:"Preguntar en Clase", d_es:"Participar activamente", t_en:"Ask Question", d_en:"Participate in class"}
+                {s:'str', xp:100, t_es:"Deep Work (Foco)", d_es:"90 min sin distracciones", t_en:"Deep Work", d_en:"90 min no distractions"},
+                {s:'int', xp:100, t_es:"Organización / Email", d_es:"Limpiar pendientes y agenda", t_en:"Inbox / Plan", d_en:"Clear tasks/agenda"},
+                {s:'int', xp:200, t_es:"Análisis / Creación", d_es:"Terminar documento o reporte", t_en:"Analysis / Create", d_en:"Finish doc or report"},
+                {s:'cha', xp:150, t_es:"Reunión Efectiva", d_es:"Reunión productiva (con notas)", t_en:"Effective Meeting", d_en:"Meeting with notes"}
+            ];
+        } else if (type === 'service') { // MESERO, RECEPCIÓN
+            missions = [
+                {s:'cha', xp:100, t_es:"Atención Cliente", d_es:"Atender con energía positiva", t_en:"Client Service", d_en:"Serve with energy"},
+                {s:'cha', xp:200, t_es:"Resolución Conflicto", d_es:"Manejar cliente difícil con calma", t_en:"Conflict Solve", d_en:"Handle difficult client"},
+                {s:'str', xp:150, t_es:"Rush / Hora Pico", d_es:"Mantener ritmo bajo presión", t_en:"Rush Hour", d_en:"Keep pace under pressure"},
+                {s:'int', xp:100, t_es:"Cierre / Caja", d_es:"Cuadrar cuentas o inventario", t_en:"Closing", d_en:"Balance cash/stock"}
+            ];
+        } else { // ACCIÓN (BOMBERO, ATLETA)
+            missions = [
+                {s:'str', xp:200, t_es:"Entrenamiento Físico", d_es:"Mantener condición óptima", t_en:"Physical Train", d_en:"Keep optimal shape"},
+                {s:'int', xp:150, t_es:"Estudio Protocolos", d_es:"Repasar estrategia/reglas", t_en:"Study Protocol", d_en:"Review strategy/rules"},
+                {s:'str', xp:300, t_es:"Acción / Evento", d_es:"Responder a emergencia o competir", t_en:"Action / Event", d_en:"Respond to emergency/compete"}
             ];
         }
+
     } else {
         try { missions = DB[player.cat].jobs[player.job].m; } catch(e){}
     }
@@ -397,11 +393,11 @@ function toast(m) {
     setTimeout(()=>{t.style.opacity=0;t.style.bottom="30px"}, 2000);
 }
 
-function save() { localStorage.setItem('rpg_save_v9', JSON.stringify(player)); }
+function save() { localStorage.setItem('rpg_save_v10', JSON.stringify(player)); }
 function openReset() { document.getElementById('modal-reset').style.display='flex'; }
 function closeReset() { document.getElementById('modal-reset').style.display='none'; }
 function confirmReset() {
-    if(document.getElementById('inp-reset').value === player.name) { localStorage.removeItem('rpg_save_v9'); location.reload(); }
+    if(document.getElementById('inp-reset').value === player.name) { localStorage.removeItem('rpg_save_v10'); location.reload(); }
 }
 </script>
 </body>
