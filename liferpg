@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Life RPG: Pressure Wash</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --card: #16213e;
+            --highlight: #0f3460;
+            --text: #e94560;
+            --gold: #ffd700;
+            --str: #e74c3c;
+            --cha: #9b59b6;
+            --int: #3498db;
+        }
+        body { font-family: 'Courier New', monospace; background: var(--bg); color: white; margin: 0; padding: 15px; user-select: none; -webkit-user-select: none; }
+        
+        /* HEADER DEL PERSONAJE */
+        .header { text-align: center; margin-bottom: 20px; }
+        .level-badge { font-size: 40px; font-weight: bold; color: var(--gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        .sub-text { color: #888; font-size: 14px; margin-top: -5px; display: block; }
+        
+        /* BARRA DE XP */
+        .xp-container { background: #333; height: 20px; border-radius: 10px; margin: 10px 0; border: 2px solid #555; position: relative; overflow: hidden; }
+        .xp-fill { background: linear-gradient(90deg, #f1c40f, #e67e22); height: 100%; width: 0%; transition: width 0.5s ease-out; }
+        .xp-text { position: absolute; top: 0; width: 100%; text-align: center; font-size: 12px; line-height: 20px; color: black; font-weight: bold; }
+
+        /* ESTADÍSTICAS */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-box { background: var(--card); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
+        .stat-val { font-size: 18px; font-weight: bold; display: block; }
+        .stat-label { font-size: 10px; opacity: 0.7; }
+        .c-str { color: var(--str); }
+        .c-cha { color: var(--cha); }
+        .c-int { color: var(--int); }
+
+        /* MISIONES (BOTONES) */
+        h3 { border-bottom: 2px solid var(--highlight); padding-bottom: 5px; margin-top: 0; }
+        .quest-btn { 
+            width: 100%; 
+            background: var(--card); 
+            border: 1px solid var(--highlight); 
+            color: white; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            border-radius: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .quest-btn:active { transform: scale(0.98); background: var(--highlight); }
+        .quest-xp { color: var(--gold); font-weight: bold; }
+        .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-right: 5px; }
+        
+        /* NOTIFICACIONES */
+        #notification {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.9); color: var(--gold); padding: 10px 20px;
+            border-radius: 20px; border: 1px solid var(--gold); opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; z-index: 100; font-weight: bold; text-align: center; width: 80%;
+        }
+
+        /* RESET */
+        .danger-zone { margin-top: 50px; text-align: center; }
+        .btn-reset { background: transparent; color: #555; border: 1px solid #333; padding: 10px; font-size: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span class="sub-text">NIVEL ACTUAL</span>
+        <div class="level-badge" id="level">1</div>
+        <div class="xp-container">
+            <div class="xp-fill" id="xp-bar"></div>
+            <div class="xp-text" id="xp-text">0 / 1000 XP</div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box c-str">
+            <span class="stat-val" id="stat-str">0</span>
+            <span class="stat-label">FUERZA</span>
+        </div>
+        <div class="stat-box c-cha">
+            <span class="stat-val" id="stat-cha">0</span>
+            <span class="stat-label">CARISMA</span>
+        </div>
+        <div class="stat-box c-int">
+            <span class="stat-val" id="stat-int">0</span>
+            <span class="stat-label">INTELIG.</span>
+        </div>
+    </div>
+
+    <h3>MISIONES DISPONIBLES</h3>
+    
+    <button class="quest-btn" onclick="completarMision(100, 'str', 1, '¡Trabajo completado!')">
+        <div><span class="tag" style="background:var(--str)">STR</span> Lavar Casa/Driveway</div>
+        <span class="quest-xp">+100 XP</span>
+    </button>
+
+    <button class="quest-btn" onclick="completarMision(150, 'cha', 1, '¡Nuevo cliente!')">
+        <div><span class="tag" style="background:var(--cha)">CHA</span> Cerrar Cliente Nuevo</div>
+        <span class="quest-xp">+150 XP</span>
+    </button>
+
+    <button class="quest-btn" onclick="completarMision(300, 'cha', 2, '¡Buena reseña!')">
+        <div><span class="tag" style="background:var(--cha)">CHA</span> Recibir Review 5★</div>
+        <span class="quest-xp">+300 XP</span>
+    </button>
+
+    <button class="quest-btn" onclick="completarMision(50, 'int', 1, 'Cotización enviada')">
+        <div><span class="tag" style="background:var(--int)">INT</span> Enviar Cotización</div>
+        <span class="quest-xp">+50 XP</span>
+    </button>
+    
+    <button class="quest-btn" onclick="completarMision(200, 'int', 2, 'Equipo mantenido')">
+        <div><span class="tag" style="background:var(--int)">INT</span> Mantenimiento Equipo</div>
+        <span class="quest-xp">+200 XP</span>
+    </button>
+
+    <div class="danger-zone">
+        <button class="btn-reset" onclick="hardReset()">⚠️ Reiniciar Personaje (Borrar Todo)</button>
+    </div>
+
+    <div id="notification"></div>
+
+<script>
+    // ESTADO INICIAL DEL JUEGO
+    let game = {
+        level: 1,
+        xp: 0,
+        nextLevel: 1000,
+        stats: { str: 0, cha: 0, int: 0 }
+    };
+
+    // CARGAR DATOS GUARDADOS
+    function loadGame() {
+        const saved = localStorage.getItem('rpg_lavado_save');
+        if (saved) {
+            game = JSON.parse(saved);
+        }
+        updateUI();
+    }
+
+    // GUARDAR DATOS
+    function saveGame() {
+        localStorage.setItem('rpg_lavado_save', JSON.stringify(game));
+    }
+
+    // SISTEMA DE MISIONES
+    function completarMision(xpGanada, statType, statAmount, mensaje) {
+        // Ganar XP
+        game.xp += xpGanada;
+        
+        // Subir Stat
+        if(statType) {
+            game.stats[statType] += statAmount;
+        }
+
+        // Chequear Level Up
+        let levelUp = false;
+        if (game.xp >= game.nextLevel) {
+            game.level++;
+            game.xp = game.xp - game.nextLevel;
+            game.nextLevel = Math.floor(game.nextLevel * 1.2); // Cada nivel pide 20% más
+            levelUp = true;
+            showNotification(`¡SUBISTE AL NIVEL ${game.level}! 🎉`);
+        } else {
+            showNotification(`${mensaje} (+${xpGanada} XP)`);
+        }
+
+        saveGame();
+        updateUI();
+    }
+
+    // ACTUALIZAR PANTALLA
+    function updateUI() {
+        document.getElementById('level').innerText = game.level;
+        document.getElementById('stat-str').innerText = game.stats.str;
+        document.getElementById('stat-cha').innerText = game.stats.cha;
+        document.getElementById('stat-int').innerText = game.stats.int;
+
+        // Barra XP
+        const porcentaje = (game.xp / game.nextLevel) * 100;
+        document.getElementById('xp-bar').style.width = porcentaje + "%";
+        document.getElementById('xp-text').innerText = `${Math.floor(game.xp)} / ${game.nextLevel} XP`;
+    }
+
+    // NOTIFICACIONES FLOTANTES
+    function showNotification(text) {
+        const notif = document.getElementById('notification');
+        notif.innerText = text;
+        notif.style.opacity = 1;
+        notif.style.transform = "translateX(-50%) translateY(-10px)";
+        
+        setTimeout(() => {
+            notif.style.opacity = 0;
+            notif.style.transform = "translateX(-50%) translateY(0)";
+        }, 2000);
+    }
+
+    // BORRAR TODO
+    function hardReset() {
+        if(confirm("¿Seguro que quieres borrar a tu personaje y empezar desde cero?")) {
+            localStorage.removeItem('rpg_lavado_save');
+            location.reload();
+        }
+    }
+
+    // INICIAR
+    loadGame();
+
+</script>
+</body>
+</html>
