@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RPG Life: Ultimate List</title>
+    <title>RPG Life: Ultimate Fixed</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --primary: #3b82f6; --accent: #8b5cf6; --gold: #f59e0b; --danger: #ef4444; --text: #f8fafc; --muted: #94a3b8; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
@@ -24,8 +24,9 @@
         
         .btn-main { background: linear-gradient(135deg, var(--primary), var(--accent)); width: 100%; padding: 14px; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
         
+        /* BOTONES DE MODO ARREGLADOS */
         .mode-toggle { display: flex; background: var(--card); border-radius: 10px; padding: 4px; margin-bottom: 20px; border: 1px solid #334155; }
-        .mode-btn { flex: 1; border: none; background: none; color: var(--muted); padding: 10px; font-weight: bold; font-size: 13px; cursor: pointer; border-radius: 8px; }
+        .mode-btn { flex: 1; border: none; background: none; color: var(--muted); padding: 10px; font-weight: bold; font-size: 13px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
         .mode-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         .profile-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid #334155; position: relative; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
@@ -211,14 +212,16 @@ const JOBS_DB = {
     stu_sci: { es: "Estudiante Ciencias", en: "Science Student", m: [{s:'str',xp:200,t:"Laboratorio",d:"Experimento"},{s:'int',xp:150,t:"Reporte",d:"Escribir hallazgos"},{s:'int',xp:150,t:"Teoría",d:"Estudiar conceptos"}] }
 };
 
-// CATEGORIAS PARA EL SELECT
+// CATEGORIAS PARA EL SELECT (TRABAJO vs ESTUDIO)
 const GROUPS = {
+    // WORK
     "🛠️ OFICIOS": ["mechanic","electric","plumber","welder","carpenter","hvac","mason","painter","landscaper","pw","pest","locksmith","roofer","solar"],
     "🤝 SERVICIO": ["chef","bartender","barista","server","frontdesk","flightatt","eventplan"],
     "🏥 SALUD": ["doctor","nurse","emt","dentist","vet","pharm","pt","trainer"],
     "🚚 TRANSPORTE/SEG": ["trucker","delivery","pilot","police","fire","security","military"],
     "💼 CORPORATIVO": ["lawyer","accountant","hr","pm","adminasst","realestate","sales_ret","consultant"],
     "🎨 TECH / CREATIVO": ["dev","designer","photo","video","architect","musician","tattoo"],
+    // STUDY
     "🎓 ESTUDIANTES": ["stu_hs","stu_med","stu_law","stu_eng","stu_arts","stu_biz","stu_sci"]
 };
 
@@ -228,19 +231,45 @@ const T = {
     en: { t_create:"CREATE PROFILE", l_name:"Name", l_clan:"Clan", l_job:"Profession", b_start:"START", l_lvl:"Level", s_str:"STRENGTH", s_cha:"CHARISMA", s_int:"MIND", b_reset:"Reset", t_danger:"DANGER ZONE", d_reset:"Type name to delete:", b_del:"DELETE", clans:["🦁 Lions (Leadership)","🦊 Foxes (Cunning)","🔮 Mages (Creativity)","🐍 Serpents (Ambition)","🐐 Goats (Persistence)"] }
 };
 
-let lang = 'es', player = { name:"", clan:"", jobKey:"", lvl:1, xp:0, next:1000, stats:{str:0, cha:0, int:0} };
+let lang = 'es', mode = 'work', player = { name:"", clan:"", jobKey:"", lvl:1, xp:0, next:1000, stats:{str:0, cha:0, int:0} };
 
 window.onload = () => {
     try {
         lang = localStorage.getItem('rpg_lang') || 'es';
         setLang(lang, false);
         
-        // LLENAR SELECT MASIVO
-        const jobSel = document.getElementById('inp-job');
-        jobSel.innerHTML = "";
-        
-        // Crear Grupos
-        for (const [groupName, keys] of Object.entries(GROUPS)) {
+        const clanSel = document.getElementById('inp-clan');
+        clanSel.innerHTML = "";
+        T[lang].clans.forEach((c, i) => { let o = document.createElement('option'); o.value = i; o.innerText = c; clanSel.appendChild(o); });
+
+        // INICIALIZAR MODO
+        setMode('work'); 
+
+        const save = localStorage.getItem('rpg_save_fixed');
+        if(save) {
+            player = JSON.parse(save);
+            if(!player.stats) player.stats = {str:0, cha:0, int:0};
+            initGame();
+        } else {
+            document.getElementById('screen-create').classList.add('active');
+        }
+    } catch(e) { document.getElementById('error-msg').style.display='block'; }
+};
+
+function setMode(m) {
+    mode = m;
+    // Update Button Styles
+    document.getElementById('t-work').className = m === 'work' ? 'mode-btn active' : 'mode-btn';
+    document.getElementById('t-study').className = m === 'study' ? 'mode-btn active' : 'mode-btn';
+
+    // Populate List based on Mode
+    const jobSel = document.getElementById('inp-job');
+    jobSel.innerHTML = "";
+    
+    for (const [groupName, keys] of Object.entries(GROUPS)) {
+        // FILTRO: Si es Study, solo mostrar grupo estudiantes. Si es Work, mostrar todo menos estudiantes.
+        const isStudentGroup = groupName === "🎓 ESTUDIANTES";
+        if ((m === 'study' && isStudentGroup) || (m === 'work' && !isStudentGroup)) {
             const grp = document.createElement('optgroup');
             grp.label = groupName;
             keys.forEach(k => {
@@ -251,21 +280,8 @@ window.onload = () => {
             });
             jobSel.appendChild(grp);
         }
-
-        const clanSel = document.getElementById('inp-clan');
-        clanSel.innerHTML = "";
-        T[lang].clans.forEach((c, i) => { let o = document.createElement('option'); o.value = i; o.innerText = c; clanSel.appendChild(o); });
-
-        const save = localStorage.getItem('rpg_save_ultimate');
-        if(save) {
-            player = JSON.parse(save);
-            if(!player.stats) player.stats = {str:0, cha:0, int:0};
-            initGame();
-        } else {
-            document.getElementById('screen-create').classList.add('active');
-        }
-    } catch(e) { document.getElementById('error-msg').style.display='block'; }
-};
+    }
+}
 
 function setLang(l, r=true) {
     lang = l; localStorage.setItem('rpg_lang', l);
@@ -341,11 +357,11 @@ function toast(m) {
     setTimeout(()=>{t.style.opacity=0;t.style.bottom="30px"}, 2000);
 }
 
-function save() { localStorage.setItem('rpg_save_ultimate', JSON.stringify(player)); }
+function save() { localStorage.setItem('rpg_save_fixed', JSON.stringify(player)); }
 function openReset() { document.getElementById('modal-reset').style.display='flex'; }
 function closeReset() { document.getElementById('modal-reset').style.display='none'; }
 function confirmReset() {
-    if(document.getElementById('inp-reset').value === player.name) { localStorage.removeItem('rpg_save_ultimate'); location.reload(); }
+    if(document.getElementById('inp-reset').value === player.name) { localStorage.removeItem('rpg_save_fixed'); location.reload(); }
 }
 </script>
 </body>
