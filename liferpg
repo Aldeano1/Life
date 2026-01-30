@@ -3,15 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RPG Life: Connected</title>
+
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f172a"> 
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <title>RPG Life</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --primary: #3b82f6; --accent: #8b5cf6; --gold: #f59e0b; --danger: #ef4444; --text: #f8fafc; --muted: #94a3b8; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 100%; max-width: 450px; position: relative; padding-bottom: 50px; }
         
-        .lang-switch { position: absolute; top: -35px; right: 0; display: flex; gap: 5px; }
-        .lang-btn { background: var(--card); border: 1px solid #334155; color: var(--muted); padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; cursor: pointer; }
-        .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        /* BOTONES DE IDIOMA */
+        .lang-switch { position: fixed; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 1000; }
+        .lang-btn { background: var(--card); border: 2px solid #334155; color: var(--text); padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
 
         .screen { display: none; animation: fade 0.4s; }
         .active { display: block; }
@@ -29,9 +38,14 @@
         .mode-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         .profile-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid #334155; position: relative; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-        .clan-tag { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 10px; color: var(--accent); border: 1px solid var(--accent); }
-        .char-name { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
-        .char-job { color: var(--muted); font-size: 13px; display: block; margin-bottom: 12px; font-style: italic; }
+        
+        /* ALINEACIÓN CORRECTA: MONEDA + CLAN ARRIBA */
+        .top-row { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 5px; }
+        .coin-display { background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 15px; border: 1px solid var(--gold); color: var(--gold); font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+        .clan-tag { background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 10px; color: var(--accent); border: 1px solid var(--accent); }
+        .char-name { font-size: 22px; font-weight: 800; margin-bottom: 4px; margin-top: 0; text-align: center; }
+        
+        .char-job { color: var(--muted); font-size: 13px; display: block; margin-bottom: 12px; font-style: italic; text-align: center; }
         
         .level-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px; font-size: 12px; color: var(--muted); }
         .lvl-big { font-size: 26px; color: var(--gold); font-weight: bold; line-height: 1; }
@@ -46,31 +60,33 @@
 
         .m-group { margin-bottom: 15px; }
         .m-head { font-size: 10px; color: var(--muted); font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #334155; margin-bottom: 8px; padding-bottom: 4px; letter-spacing: 1px; }
-        .m-btn { 
-            background: var(--card); border: 1px solid #334155; padding: 14px; border-radius: 12px; 
-            margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; 
-            color: white; text-align: left; cursor: pointer; transition: 0.1s; position: relative; overflow: hidden;
-        }
+        .m-btn { background: var(--card); border: 1px solid #334155; padding: 14px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; color: white; text-align: left; cursor: pointer; transition: 0.1s; position: relative; overflow: hidden; }
         .m-btn:active { transform: scale(0.98); background: #334155; border-color: var(--primary); }
         .m-info { flex: 1; margin-right: 10px; }
         .m-title { font-size: 14px; font-weight: 600; display: block; margin-bottom: 2px; }
         .m-desc { font-size: 11px; color: var(--muted); }
         .xp-badge { background: rgba(255,255,255,0.08); padding: 6px 10px; border-radius: 8px; font-size: 12px; color: var(--gold); font-weight: bold; min-width: 50px; text-align: center; }
 
-        /* Botón Sync (Verde) */
-        .btn-sync { background: #10b981; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; letter-spacing: 0.5px; }
-        .btn-sync:active { transform: scale(0.98); opacity: 0.9; }
-
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; padding: 10px 20px; border-radius: 30px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 99; width: 80%; text-align: center; }
         .settings-link { display: block; text-align: center; color: #475569; font-size: 12px; text-decoration: underline; margin-top: 20px; cursor: pointer; padding: 10px; }
         .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
         .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 100%; max-width: 320px; text-align: center; border: 1px solid var(--danger); }
         #error-msg { display:none; color:white; background:#ef4444; padding:20px; position:fixed; top:0; left:0; width:100%; z-index:9999; text-align:center; }
+
+        /* ESTILOS DE LA TIENDA */
+        .shop-btn { background: #7c3aed; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: center; gap: 8px; }
+        .shop-item { background: #0f172a; border: 1px solid #334155; padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .shop-item.owned { border-color: var(--accent); opacity: 0.8; }
+        .shop-item button { padding: 5px 10px; border-radius: 5px; cursor: pointer; border: none; font-weight: bold; }
+        .btn-buy { background: var(--gold); color: black; }
+        .btn-equip { background: var(--primary); color: white; }
+        .btn-equipped { background: var(--muted); color: white; cursor: default; }
+
     </style>
 </head>
 <body>
 
-<div id="error-msg">Error. <button onclick="localStorage.clear();location.reload()">Reset</button></div>
+<div id="error-msg">Error crítico. <button onclick="localStorage.clear();location.reload()">Reset</button></div>
 
 <div class="container">
     <div class="lang-switch">
@@ -80,27 +96,26 @@
 
     <div id="screen-create" class="screen">
         <h1 data-t="t_create">CREA TU PERFIL</h1>
-        
         <div class="mode-toggle">
             <button class="mode-btn active" id="t-work" onclick="setMode('work')">👔 TRABAJO</button>
             <button class="mode-btn" id="t-study" onclick="setMode('study')">🎓 ESTUDIO</button>
         </div>
-
         <label data-t="l_name">Nombre</label>
         <input type="text" id="inp-name" placeholder="...">
-        
         <label data-t="l_clan">Clan</label>
         <select id="inp-clan"></select>
-
-        <label id="lbl-job" data-t="l_job">Selecciona tu Profesión / Carrera</label>
+        <label id="lbl-job" data-t="l_job">Selecciona tu Profesión</label>
         <select id="inp-job"></select>
-
         <button class="btn-main" onclick="startGame()" data-t="b_start">EMPEZAR</button>
     </div>
 
     <div id="screen-game" class="screen">
         <div class="profile-card">
-            <span class="clan-tag" id="ui-clan">Clan</span>
+            <div class="top-row">
+                <div class="coin-display">🪙 <span id="ui-coins">0</span></div>
+                <span class="clan-tag" id="ui-clan">Clan</span>
+            </div>
+            
             <div class="char-name" id="ui-name">Name</div>
             <span class="char-job" id="ui-job">Job Title</span>
             <div class="level-row">
@@ -111,9 +126,7 @@
             <div style="text-align:right; font-size:10px; color:#64748b; margin-top:4px" id="ui-xp-txt">0/1000</div>
         </div>
 
-        <button class="btn-sync" onclick="syncData()">
-            ☁️ <span data-t="b_sync">GUARDAR EN LA NUBE</span>
-        </button>
+        <button class="shop-btn" onclick="openShop()">🛒 TIENDA DE TÍTULOS</button>
 
         <div class="stats">
             <div class="stat-box"><span class="s-val c-str" id="v-str">0</span><span class="s-lbl" data-t="s_str">FUERZA</span></div>
@@ -137,99 +150,696 @@
     </div>
 </div>
 
+<div class="modal-bg" id="modal-shop">
+    <div class="modal" style="max-width: 400px; text-align: left;">
+        <h3 style="color:var(--gold); text-align:center;">TIENDA DE TÍTULOS</h3>
+        <p style="text-align:center; font-size:12px; color:#ccc;">Ganas 1 moneda cada 15% de progreso.</p>
+        <div style="text-align:center; margin-bottom:15px; font-weight:bold; color:var(--gold)">
+            Tus Monedas: 🪙 <span id="shop-coins">0</span>
+        </div>
+        <div id="shop-list" style="max-height: 300px; overflow-y: auto;"></div>
+        <button style="background:none; border:none; color:#888; text-decoration:underline; width:100%; margin-top:10px" onclick="closeShop()">Cerrar</button>
+    </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-/* =========================================
-   TU LINK DE FORMSPREE YA INTEGRADO AQUÍ
-   ========================================= */
-const API_URL = "https://formspree.io/f/xkobbevd"; 
+// AQUÍ VAN LOS ITEMS DE LA TIENDA (Edita los precios aquí si quieres)
+const SHOP_ITEMS = [
+    { id: 't1', name: "El Novato", price: 1 },
+    { id: 't2', name: "El Aprendiz", price: 3 },
+    { id: 't3', name: "El Experto", price: 5 },
+    { id: 't4', name: "El Maestro", price: 10 },
+    { id: 't5', name: "Leyenda", price: 20 },
+    { id: 't6', name: "El Imparable", price: 30 },
+    { id: 't7', name: "Dios del Trabajo", price: 50 }
+];
 
+/* AQUÍ ABAJO EMPIEZA LO QUE YA TENÍAS (JOBS_DB) */
 
-/* BASE DE DATOS ROBUSTA */
 const JOBS_DB = {
-    // OFICIOS
-    mechanic: { es: "Mecánico", en: "Mechanic", m: [{s:'str',xp:150,t:"Servicio Rápido",d:"Cambio aceite/frenos"},{s:'int',xp:200,t:"Diagnóstico",d:"Hallar falla"},{s:'cha',xp:100,t:"Explicar",d:"Asesorar cliente"}] },
-    electric: { es: "Electricista", en: "Electrician", m: [{s:'str',xp:150,t:"Cableado",d:"Instalar circuito"},{s:'int',xp:250,t:"Troubleshoot",d:"Rastrear corto"},{s:'int',xp:100,t:"Seguridad",d:"Testear tierra"}] },
-    plumber: { es: "Plomero", en: "Plumber", m: [{s:'str',xp:200,t:"Instalación",d:"Baño/Cocina"},{s:'str',xp:300,t:"Desatascar",d:"Drenaje sucio"},{s:'int',xp:150,t:"Fugas",d:"Detectar origen"}] },
-    welder: { es: "Soldador", en: "Welder", m: [{s:'str',xp:200,t:"Soldar",d:"Unión precisa"},{s:'int',xp:150,t:"Planos",d:"Leer simbología"},{s:'str',xp:100,t:"Pulir",d:"Acabado limpio"}] },
-    carpenter: { es: "Carpintero", en: "Carpenter", m: [{s:'str',xp:200,t:"Construir",d:"Estructura/Mueble"},{s:'int',xp:150,t:"Medir",d:"Corte exacto"},{s:'str',xp:100,t:"Lijar",d:"Acabado suave"}] },
-    hvac: { es: "Técnico HVAC", en: "HVAC Tech", m: [{s:'str',xp:200,t:"Instalar A/C",d:"Montar unidad"},{s:'int',xp:200,t:"Carga Gas",d:"Medir presión"},{s:'str',xp:150,t:"Techos",d:"Trabajo altura"}] },
-    mason: { es: "Albañil", en: "Mason", m: [{s:'str',xp:250,t:"Levantar Muro",d:"Hiladas niveladas"},{s:'str',xp:150,t:"Mezcla",d:"Preparar concreto"},{s:'int',xp:100,t:"Nivel",d:"Usar plomada"}] },
-    painter: { es: "Pintor", en: "Painter", m: [{s:'str',xp:100,t:"Preparar",d:"Lijar/Tapar"},{s:'str',xp:200,t:"Pintar",d:"Rodillo/Brocha"},{s:'int',xp:100,t:"Detalle",d:"Recortes precisos"}] },
-    landscaper: { es: "Jardinero", en: "Landscaper", m: [{s:'str',xp:200,t:"Podar",d:"Cortar césped/arbol"},{s:'str',xp:300,t:"Plantar",d:"Instalar jardín"},{s:'int',xp:100,t:"Riego",d:"Reparar sistema"}] },
-    pw: { es: "Lavado Presión", en: "Pressure Washer", m: [{s:'str',xp:150,t:"Lavar Casa",d:"Limpiar siding"},{s:'str',xp:200,t:"Concreto",d:"Driveway/Piso"},{s:'int',xp:100,t:"Químicos",d:"Mezcla correcta"}] },
-    pest: { es: "Control Plagas", en: "Pest Control", m: [{s:'int',xp:150,t:"Inspección",d:"Buscar nidos"},{s:'str',xp:150,t:"Aplicar",d:"Rociar perímetro"},{s:'cha',xp:100,t:"Reporte",d:"Explicar cliente"}] },
-    locksmith: { es: "Cerrajero", en: "Locksmith", m: [{s:'int',xp:200,t:"Apertura",d:"Abrir puerta"},{s:'int',xp:100,t:"Copia Llave",d:"Duplicado"},{s:'str',xp:150,t:"Instalar",d:"Cambiar chapa"}] },
-    roofer: { es: "Techador", en: "Roofer", m: [{s:'str',xp:300,t:"Tejas",d:"Clavar shingles"},{s:'str',xp:150,t:"Arrancar",d:"Quitar viejo"},{s:'int',xp:150,t:"Sellar",d:"Impermeabilizar"}] },
-    solar: { es: "Instalador Solar", en: "Solar Installer", m: [{s:'str',xp:200,t:"Paneles",d:"Montaje techo"},{s:'int',xp:200,t:"Conexión",d:"Inversor"},{s:'str',xp:150,t:"Seguridad",d:"Arnés/Altura"}] },
+    // --- 🛠️ OFICIOS (TRADES) ---
+    mechanic: { 
+        es: "Mecánico", en: "Mechanic", 
+        m: [
+            {s:'str',xp:100,t:"Cambio Aceite",d:"Mantenimiento básico",t_en:"Oil Change",d_en:"Basic maintenance"},
+            {s:'str',xp:150,t:"Frenos",d:"Cambiar pastillas",t_en:"Brakes",d_en:"Change pads"},
+            {s:'str',xp:200,t:"Neumáticos",d:"Rotación y balanceo",t_en:"Tires",d_en:"Rotation & balance"},
+            {s:'int',xp:250,t:"Diagnóstico",d:"Escanear computadora",t_en:"Diagnostics",d_en:"Scan computer"},
+            {s:'int',xp:300,t:"Motor",d:"Ajuste de válvulas",t_en:"Engine",d_en:"Valve adjustment"},
+            {s:'int',xp:150,t:"Eléctrico",d:"Buscar corto",t_en:"Electrical",d_en:"Find short"},
+            {s:'cha',xp:100,t:"Presupuesto",d:"Explicar costos",t_en:"Quote",d_en:"Explain costs"}
+        ] 
+    },
+    electric: { 
+        es: "Electricista", en: "Electrician", 
+        m: [
+            {s:'str',xp:150,t:"Cableado",d:"Tirar líneas nuevas",t_en:"Wiring",d_en:"Pull new lines"},
+            {s:'str',xp:100,t:"Enchufes",d:"Instalar tomas",t_en:"Outlets",d_en:"Install sockets"},
+            {s:'int',xp:250,t:"Cortocircuito",d:"Rastrear falla",t_en:"Short Circuit",d_en:"Trace fault"},
+            {s:'int',xp:300,t:"Panel",d:"Upgrade de breakers",t_en:"Panel",d_en:"Breaker upgrade"},
+            {s:'int',xp:150,t:"Planos",d:"Calcular cargas",t_en:"Blueprints",d_en:"Calc loads"},
+            {s:'cha',xp:100,t:"Seguridad",d:"Educar cliente",t_en:"Safety",d_en:"Educate client"}
+        ] 
+    },
+    plumber: { 
+        es: "Plomero", en: "Plumber", 
+        m: [
+            {s:'str',xp:200,t:"Inodoro",d:"Instalación completa",t_en:"Toilet",d_en:"Full install"},
+            {s:'str',xp:300,t:"Desatascar",d:"Drenaje principal",t_en:"Unclog",d_en:"Main drain"},
+            {s:'str',xp:150,t:"Tubería",d:"Cortar y pegar PVC",t_en:"Piping",d_en:"Cut & glue PVC"},
+            {s:'int',xp:200,t:"Fugas",d:"Detectar origen",t_en:"Leaks",d_en:"Find source"},
+            {s:'int',xp:250,t:"Calentador",d:"Reparar termostato",t_en:"Heater",d_en:"Fix thermostat"},
+            {s:'cha',xp:100,t:"Urgencia",d:"Calmar cliente",t_en:"Urgency",d_en:"Calm client"}
+        ] 
+    },
+    welder: { 
+        es: "Soldador", en: "Welder", 
+        m: [
+            {s:'str',xp:200,t:"Soldadura MIG",d:"Unión rápida",t_en:"MIG Weld",d_en:"Fast join"},
+            {s:'str',xp:250,t:"Estructura",d:"Vigas pesadas",t_en:"Structure",d_en:"Heavy beams"},
+            {s:'str',xp:100,t:"Pulir",d:"Limpiar escoria",t_en:"Grind",d_en:"Clean slag"},
+            {s:'int',xp:300,t:"TIG Precisión",d:"Acero inoxidable",t_en:"TIG Precision",d_en:"Stainless steel"},
+            {s:'int',xp:150,t:"Planos",d:"Leer simbología",t_en:"Prints",d_en:"Read symbols"},
+            {s:'int',xp:100,t:"Seguridad",d:"Revisar gases",t_en:"Safety",d_en:"Check gases"}
+        ] 
+    },
+    carpenter: { 
+        es: "Carpintero", en: "Carpenter", 
+        m: [
+            {s:'str',xp:250,t:"Enmarcar",d:"Levantar paredes",t_en:"Framing",d_en:"Build walls"},
+            {s:'str',xp:200,t:"Pisos",d:"Instalar madera",t_en:"Flooring",d_en:"Install wood"},
+            {s:'str',xp:150,t:"Lijar",d:"Preparar superficie",t_en:"Sanding",d_en:"Prep surface"},
+            {s:'int',xp:200,t:"Gabinetes",d:"Diseño a medida",t_en:"Cabinets",d_en:"Custom design"},
+            {s:'int',xp:150,t:"Medición",d:"Corte milimétrico",t_en:"Measuring",d_en:"Precise cut"},
+            {s:'cha',xp:100,t:"Diseño",d:"Acordar estilo",t_en:"Design",d_en:"Agree style"}
+        ] 
+    },
+    hvac: { 
+        es: "Técnico HVAC", en: "HVAC Tech", 
+        m: [
+            {s:'str',xp:250,t:"Compresor",d:"Subir unidad al techo",t_en:"Compressor",d_en:"Unit to roof"},
+            {s:'str',xp:150,t:"Ductos",d:"Sellar fugas",t_en:"Ducts",d_en:"Seal leaks"},
+            {s:'str',xp:100,t:"Limpieza",d:"Lavar filtros",t_en:"Cleaning",d_en:"Wash filters"},
+            {s:'int',xp:200,t:"Gas",d:"Cargar refrigerante",t_en:"Gas",d_en:"Charge refrigerant"},
+            {s:'int',xp:250,t:"Placa",d:"Soldar electrónica",t_en:"Board",d_en:"Solder electronics"},
+            {s:'int',xp:150,t:"Termostato",d:"Programación",t_en:"Thermostat",d_en:"Programming"}
+        ] 
+    },
+    mason: { 
+        es: "Albañil", en: "Mason", 
+        m: [
+            {s:'str',xp:300,t:"Muro",d:"Pegar bloques",t_en:"Wall",d_en:"Lay bricks"},
+            {s:'str',xp:250,t:"Mezcla",d:"Palear cemento",t_en:"Mix",d_en:"Shovel cement"},
+            {s:'str',xp:200,t:"Cimientos",d:"Excavar zanjas",t_en:"Foundation",d_en:"Dig trenches"},
+            {s:'int',xp:150,t:"Nivel",d:"Plomada y Hilo",t_en:"Level",d_en:"Plumb line"},
+            {s:'int',xp:200,t:"Acabados",d:"Pañetar fino",t_en:"Finish",d_en:"Fine plaster"},
+            {s:'cha',xp:100,t:"Coordinar",d:"Pedir material",t_en:"Coord",d_en:"Order mats"}
+        ] 
+    },
+    painter: { 
+        es: "Pintor", en: "Painter", 
+        m: [
+            {s:'str',xp:200,t:"Rodillo",d:"Cubrir paredes",t_en:"Roller",d_en:"Cover walls"},
+            {s:'str',xp:150,t:"Techos",d:"Pintar altura",t_en:"Ceilings",d_en:"Paint heights"},
+            {s:'str',xp:100,t:"Lijar",d:"Quitar imperfecciones",t_en:"Sand",d_en:"Remove defects"},
+            {s:'int',xp:150,t:"Recortes",d:"Brocha fina",t_en:"Cutting in",d_en:"Fine brush"},
+            {s:'int',xp:200,t:"Mezcla",d:"Igualar color",t_en:"Mixing",d_en:"Match color"},
+            {s:'cha',xp:100,t:"Protección",d:"Encintar muebles",t_en:"Protect",d_en:"Tape furniture"}
+        ] 
+    },
+    landscaper: { 
+        es: "Jardinero", en: "Landscaper", 
+        m: [
+            {s:'str',xp:200,t:"Cortar",d:"Podar césped",t_en:"Mowing",d_en:"Cut grass"},
+            {s:'str',xp:250,t:"Talar",d:"Cortar ramas altas",t_en:"Logging",d_en:"High branches"},
+            {s:'str',xp:150,t:"Limpieza",d:"Recoger hojas",t_en:"Cleanup",d_en:"Rake leaves"},
+            {s:'int',xp:200,t:"Diseño",d:"Planear jardín",t_en:"Design",d_en:"Plan garden"},
+            {s:'int',xp:150,t:"Riego",d:"Reparar aspersores",t_en:"Irrigation",d_en:"Fix sprinklers"},
+            {s:'int',xp:100,t:"Fertilizante",d:"Mezcla química",t_en:"Fertilizer",d_en:"Chem mix"}
+        ] 
+    },
+    pw: { 
+        es: "Lavado Presión", en: "Pressure Washer", 
+        m: [
+            {s:'str',xp:200,t:"Driveway",d:"Limpiar concreto",t_en:"Driveway",d_en:"Clean concrete"},
+            {s:'str',xp:150,t:"Techo",d:"Quitar moho",t_en:"Roof",d_en:"Remove mold"},
+            {s:'str',xp:250,t:"Equipo",d:"Mover máquina",t_en:"Gear",d_en:"Move machine"},
+            {s:'int',xp:150,t:"Químicos",d:"Mezcla cloro",t_en:"Chems",d_en:"Mix bleach"},
+            {s:'int',xp:100,t:"Boquillas",d:"Elegir presión",t_en:"Nozzles",d_en:"Choose pressure"},
+            {s:'cha',xp:100,t:"Venta",d:"Ofrecer sellado",t_en:"Upsell",d_en:"Offer sealing"}
+        ] 
+    },
+    pest: { 
+        es: "Control Plagas", en: "Pest Control", 
+        m: [
+            {s:'int',xp:200,t:"Inspección",d:"Buscar nidos",t_en:"Inspect",d_en:"Find nests"},
+            {s:'int',xp:150,t:"Cebo",d:"Colocar trampas",t_en:"Bait",d_en:"Set traps"},
+            {s:'str',xp:150,t:"Fumigar",d:"Rociar perímetro",t_en:"Spray",d_en:"Spray perimeter"},
+            {s:'str',xp:100,t:"Ático",d:"Subir con equipo",t_en:"Attic",d_en:"Climb w/ gear"},
+            {s:'cha',xp:150,t:"Informe",d:"Explicar prevención",t_en:"Report",d_en:"Explain prevent"},
+            {s:'int',xp:100,t:"Identificar",d:"Tipo de insecto",t_en:"Identify",d_en:"Bug type"}
+        ] 
+    },
+    locksmith: { 
+        es: "Cerrajero", en: "Locksmith", 
+        m: [
+            {s:'int',xp:250,t:"Apertura",d:"Ganzúa fina",t_en:"Picking",d_en:"Fine tools"},
+            {s:'int',xp:150,t:"Código",d:"Programar llave auto",t_en:"Code",d_en:"Program key"},
+            {s:'str',xp:150,t:"Taladro",d:"Romper cilindro",t_en:"Drill",d_en:"Break cylinder"},
+            {s:'str',xp:200,t:"Instalar",d:"Poner cerrojo",t_en:"Install",d_en:"Fit deadbolt"},
+            {s:'cha',xp:100,t:"Emergencia",d:"Llegar rápido",t_en:"Emergency",d_en:"Arrive fast"},
+            {s:'int',xp:100,t:"Duplicado",d:"Corte preciso",t_en:"Copy",d_en:"Precise cut"}
+        ] 
+    },
+    roofer: { 
+        es: "Techador", en: "Roofer", 
+        m: [
+            {s:'str',xp:300,t:"Tejas",d:"Clavar shingles",t_en:"Shingles",d_en:"Nail down"},
+            {s:'str',xp:250,t:"Arrancar",d:"Quitar techo viejo",t_en:"Tear off",d_en:"Remove old"},
+            {s:'str',xp:200,t:"Cargar",d:"Subir material",t_en:"Haul",d_en:"Lift materials"},
+            {s:'int',xp:200,t:"Sellado",d:"Impermeabilizar",t_en:"Seal",d_en:"Waterproof"},
+            {s:'int',xp:150,t:"Medidas",d:"Calcular área",t_en:"Measure",d_en:"Calc area"},
+            {s:'int',xp:100,t:"Desagüe",d:"Instalar canaletas",t_en:"Drainage",d_en:"Install gutters"}
+        ] 
+    },
+    solar: { 
+        es: "Instalador Solar", en: "Solar Installer", 
+        m: [
+            {s:'str',xp:250,t:"Montaje",d:"Anclar rieles",t_en:"Mounting",d_en:"Anchor rails"},
+            {s:'str',xp:200,t:"Paneles",d:"Subir módulos",t_en:"Panels",d_en:"Lift modules"},
+            {s:'int',xp:250,t:"Inversor",d:"Conexión eléctrica",t_en:"Inverter",d_en:"Elec connect"},
+            {s:'int',xp:200,t:"Batería",d:"Configurar banco",t_en:"Battery",d_en:"Setup bank"},
+            {s:'int',xp:150,t:"App",d:"Configurar monitoreo",t_en:"App",d_en:"Setup monitor"},
+            {s:'cha',xp:100,t:"Entrega",d:"Enseñar sistema",t_en:"Handover",d_en:"Teach system"}
+        ] 
+    },
     
-    // SERVICIO
-    chef: { es: "Chef", en: "Chef", m: [{s:'str',xp:200,t:"Servicio",d:"Hora pico"},{s:'str',xp:100,t:"Mise en place",d:"Preparar todo"},{s:'int',xp:150,t:"Crear",d:"Plato nuevo"}] },
-    bartender: { es: "Bartender", en: "Bartender", m: [{s:'str',xp:150,t:"Tragos",d:"Rapidez"},{s:'cha',xp:200,t:"Atención",d:"Conversar"},{s:'int',xp:100,t:"Inventario",d:"Contar stock"}] },
-    barista: { es: "Barista", en: "Barista", m: [{s:'int',xp:100,t:"Calibrar",d:"Espresso ok"},{s:'str',xp:150,t:"Rush",d:"Muchos pedidos"},{s:'cha',xp:100,t:"Arte",d:"Latte art"}] },
-    server: { es: "Mesero", en: "Waiter", m: [{s:'str',xp:150,t:"Bandeja",d:"Llevar platos"},{s:'cha',xp:200,t:"Venta",d:"Sugerir postre"},{s:'int',xp:100,t:"Memoria",d:"Recordar orden"}] },
-    frontdesk: { es: "Recepción", en: "Reception", m: [{s:'cha',xp:150,t:"Check-in",d:"Recibir huésped"},{s:'cha',xp:200,t:"Queja",d:"Resolver problema"},{s:'int',xp:100,t:"Reservas",d:"Organizar"}] },
-    flightatt: { es: "Azafata", en: "Flight Attendant", m: [{s:'cha',xp:150,t:"Servicio",d:"Atender pasajero"},{s:'int',xp:200,t:"Seguridad",d:"Chequeo"},{s:'str',xp:100,t:"Emergencia",d:"Protocolo"}] },
-    eventplan: { es: "Event Planner", en: "Event Planner", m: [{s:'int',xp:200,t:"Logística",d:"Coordinar"},{s:'cha',xp:150,t:"Cliente",d:"Calmar nervios"},{s:'str',xp:150,t:"Montaje",d:"Supervisar"}] },
+    // --- 🤝 SERVICIO (SERVICE) ---
+    chef: { 
+        es: "Chef", en: "Chef", 
+        m: [
+            {s:'str',xp:200,t:"Hora Pico",d:"Cocinar bajo presión",t_en:"Rush Hour",d_en:"Cook under pressure"},
+            {s:'str',xp:150,t:"Mise en place",d:"Picar 50kg cebolla",t_en:"Prep",d_en:"Chop 50kg onions"},
+            {s:'str',xp:100,t:"Limpieza",d:"Fregar cocina",t_en:"Cleaning",d_en:"Scrub kitchen"},
+            {s:'int',xp:200,t:"Menú",d:"Crear plato nuevo",t_en:"Menu",d_en:"Create new dish"},
+            {s:'int',xp:150,t:"Inventario",d:"Costear recetas",t_en:"Inventory",d_en:"Cost recipes"},
+            {s:'cha',xp:150,t:"Liderazgo",d:"Dirigir brigada",t_en:"Lead",d_en:"Direct brigade"}
+        ] 
+    },
+    bartender: { 
+        es: "Bartender", en: "Bartender", 
+        m: [
+            {s:'str',xp:150,t:"Shaker",d:"Agitar cócteles",t_en:"Shaker",d_en:"Shake cocktails"},
+            {s:'str',xp:100,t:"Barriles",d:"Cambiar barril",t_en:"Kegs",d_en:"Change keg"},
+            {s:'cha',xp:200,t:"Psicólogo",d:"Escuchar clientes",t_en:"Therapist",d_en:"Listen to clients"},
+            {s:'cha',xp:150,t:"Propinas",d:"Encantar gente",t_en:"Tips",d_en:"Charm people"},
+            {s:'int',xp:150,t:"Mixología",d:"Inventar trago",t_en:"Mixology",d_en:"Invent drink"},
+            {s:'int',xp:100,t:"Caja",d:"Cierre de cuenta",t_en:"Till",d_en:"Close tab"}
+        ] 
+    },
+    barista: { 
+        es: "Barista", en: "Barista", 
+        m: [
+            {s:'int',xp:150,t:"Calibrar",d:"Ajustar molino",t_en:"Dial-in",d_en:"Adjust grinder"},
+            {s:'str',xp:200,t:"Rush Mañana",d:"100 cafés/hora",t_en:"Morning Rush",d_en:"100 coffees/hr"},
+            {s:'str',xp:100,t:"Leche",d:"Vaporizar perfecto",t_en:"Milk",d_en:"Steam perfectly"},
+            {s:'cha',xp:150,t:"Arte Latte",d:"Dibujar cisne",t_en:"Latte Art",d_en:"Pour swan"},
+            {s:'cha',xp:100,t:"Nombre",d:"No equivocarse",t_en:"Name",d_en:"Spell correctly"},
+            {s:'int',xp:100,t:"Limpieza",d:"Backflush máquina",t_en:"Clean",d_en:"Backflush machine"}
+        ] 
+    },
+    server: { 
+        es: "Mesero", en: "Waiter", 
+        m: [
+            {s:'str',xp:150,t:"Bandeja",d:"Cargar 5 platos",t_en:"Tray",d_en:"Carry 5 plates"},
+            {s:'str',xp:200,t:"Doble Turno",d:"Estar de pie 12h",t_en:"Double",d_en:"Stand 12h"},
+            {s:'cha',xp:200,t:"Venta",d:"Sugerir vinos caros",t_en:"Upsell",d_en:"Suggest wines"},
+            {s:'cha',xp:150,t:"Queja",d:"Calmar cliente",t_en:"Complaint",d_en:"Calm guest"},
+            {s:'int',xp:150,t:"Memoria",d:"Recordar sin anotar",t_en:"Memory",d_en:"Remember order"},
+            {s:'int',xp:100,t:"Dividir",d:"Separar cuentas",t_en:"Split",d_en:"Split bills"}
+        ] 
+    },
+    frontdesk: { 
+        es: "Recepción", en: "Reception", 
+        m: [
+            {s:'cha',xp:150,t:"Check-in",d:"Bienvenida cálida",t_en:"Check-in",d_en:"Warm welcome"},
+            {s:'cha',xp:200,t:"Conflicto",d:"Habitación sucia",t_en:"Conflict",d_en:"Dirty room"},
+            {s:'int',xp:200,t:"Overbooking",d:"Resolver Tetris",t_en:"Overbooked",d_en:"Solve Tetris"},
+            {s:'int',xp:150,t:"Auditoría",d:"Cierre nocturno",t_en:"Audit",d_en:"Night audit"},
+            {s:'str',xp:100,t:"Maletas",d:"Ayudar botones",t_en:"Bags",d_en:"Help bellboy"},
+            {s:'cha',xp:100,t:"Concierge",d:"Recomendar tours",t_en:"Concierge",d_en:"Recommend tours"}
+        ] 
+    },
+    flightatt: { 
+        es: "Azafata", en: "Flight Attendant", 
+        m: [
+            {s:'int',xp:150,t:"Seguridad",d:"Demo chaleco",t_en:"Safety",d_en:"Vest demo"},
+            {s:'str',xp:200,t:"Carrito",d:"Servicio pasillo",t_en:"Cart",d_en:"Aisle service"},
+            {s:'str',xp:150,t:"Equipaje",d:"Cerrar bins",t_en:"Luggage",d_en:"Close bins"},
+            {s:'cha',xp:200,t:"Turbulencia",d:"Calmar pánico",t_en:"Turbulence",d_en:"Calm panic"},
+            {s:'int',xp:150,t:"Emergencia",d:"Primeros auxilios",t_en:"Emergency",d_en:"First aid"},
+            {s:'cha',xp:100,t:"Despedida",d:"Sonrisa final",t_en:"Farewell",d_en:"Final smile"}
+        ] 
+    },
+    eventplan: { 
+        es: "Event Planner", en: "Event Planner", 
+        m: [
+            {s:'int',xp:250,t:"Logística",d:"Cronograma minuto a minuto",t_en:"Logistics",d_en:"Timeline"},
+            {s:'int',xp:200,t:"Presupuesto",d:"Negociar precios",t_en:"Budget",d_en:"Negotiate"},
+            {s:'cha',xp:200,t:"Novios/Jefes",d:"Manejar estrés",t_en:"Clients",d_en:"Manage stress"},
+            {s:'str',xp:150,t:"Montaje",d:"Mover decoración",t_en:"Setup",d_en:"Move decor"},
+            {s:'cha',xp:150,t:"Proveedores",d:"Coordinar catering",t_en:"Vendors",d_en:"Coord catering"},
+            {s:'int',xp:100,t:"Plan B",d:"Lluvia imprevista",t_en:"Plan B",d_en:"Sudden rain"}
+        ] 
+    }, // <-- Esta coma es importante para conectar con la parte anterior
 
-    // SALUD
-    doctor: { es: "Médico", en: "Doctor", m: [{s:'int',xp:250,t:"Diagnóstico",d:"Analizar síntomas"},{s:'cha',xp:150,t:"Comunicar",d:"Dar noticias"},{s:'str',xp:200,t:"Guardia",d:"Turno largo"}] },
-    nurse: { es: "Enfermero/a", en: "Nurse", m: [{s:'str',xp:150,t:"Ronda",d:"Signos vitales"},{s:'str',xp:150,t:"Vía",d:"Poner suero"},{s:'cha',xp:200,t:"Cuidado",d:"Apoyo emocional"}] },
-    emt: { es: "Paramédico", en: "EMT", m: [{s:'str',xp:250,t:"Rescate",d:"Actuar rápido"},{s:'str',xp:200,t:"Cargar",d:"Camilla"},{s:'int',xp:150,t:"Estabilizar",d:"Primeros auxilios"}] },
-    dentist: { es: "Dentista", en: "Dentist", m: [{s:'str',xp:150,t:"Procedimiento",d:"Dientes"},{s:'int',xp:150,t:"Precisión",d:"Trabajo fino"},{s:'cha',xp:100,t:"Calmar",d:"Paciente nervioso"}] },
-    vet: { es: "Veterinario", en: "Vet", m: [{s:'int',xp:200,t:"Diagnóstico",d:"Animal"},{s:'str',xp:150,t:"Cirugía",d:"Operar"},{s:'cha',xp:100,t:"Dueño",d:"Explicar"}] },
-    pharm: { es: "Farmacéutico", en: "Pharmacist", m: [{s:'int',xp:150,t:"Receta",d:"Verificar"},{s:'cha',xp:100,t:"Consejo",d:"Explicar uso"},{s:'int',xp:100,t:"Stock",d:"Control"}] },
-    pt: { es: "Fisioterapeuta", en: "Physio", m: [{s:'str',xp:150,t:"Masaje",d:"Manual"},{s:'cha',xp:150,t:"Motivar",d:"Animar"},{s:'int',xp:100,t:"Plan",d:"Rutina"}] },
-    trainer: { es: "Entrenador", en: "Trainer", m: [{s:'str',xp:150,t:"Clase",d:"Entreno 1:1"},{s:'cha',xp:150,t:"Corregir",d:"Postura"},{s:'int',xp:100,t:"Planificar",d:"Rutina mes"}] },
+    // --- 🏥 SALUD (HEALTH) ---
+    doctor: { 
+        es: "Médico", en: "Doctor", 
+        m: [
+            {s:'int',xp:300,t:"Diagnóstico",d:"Caso complejo House MD",t_en:"Diagnosis",d_en:"Complex case"},
+            {s:'int',xp:200,t:"Historial",d:"Revisar antecedentes",t_en:"History",d_en:"Review records"},
+            {s:'cha',xp:200,t:"Noticias",d:"Comunicar diagnóstico",t_en:"News",d_en:"Break bad news"},
+            {s:'str',xp:250,t:"Guardia",d:"Turno 24hs",t_en:"Shift",d_en:"24h duty"},
+            {s:'str',xp:150,t:"RCP",d:"Reanimación física",t_en:"CPR",d_en:"Physical resus"},
+            {s:'int',xp:150,t:"Receta",d:"Prescribir dosis",t_en:"Rx",d_en:"Prescribe dose"}
+        ] 
+    },
+    nurse: { 
+        es: "Enfermero/a", en: "Nurse", 
+        m: [
+            {s:'str',xp:200,t:"Ronda",d:"Caminar todo el piso",t_en:"Rounds",d_en:"Walk the floor"},
+            {s:'str',xp:250,t:"Movilizar",d:"Levantar paciente",t_en:"Lift",d_en:"Move patient"},
+            {s:'int',xp:150,t:"Vía",d:"Encontrar vena",t_en:"IV Line",d_en:"Find vein"},
+            {s:'int',xp:200,t:"Triage",d:"Priorizar urgencia",t_en:"Triage",d_en:"Prioritize"},
+            {s:'cha',xp:200,t:"Empatía",d:"Consolar familia",t_en:"Empathy",d_en:"Comfort family"},
+            {s:'int',xp:100,t:"Reporte",d:"Llenar historial",t_en:"Chart",d_en:"Fill records"}
+        ] 
+    },
+    emt: { 
+        es: "Paramédico", en: "EMT", 
+        m: [
+            {s:'str',xp:250,t:"Cargar",d:"Camilla escaleras",t_en:"Lift",d_en:"Stretcher stairs"},
+            {s:'str',xp:200,t:"RCP",d:"Compresiones",t_en:"CPR",d_en:"Compressions"},
+            {s:'int',xp:200,t:"Evaluación",d:"Escena segura",t_en:"Assess",d_en:"Scene safe"},
+            {s:'int',xp:150,t:"Estabilizar",d:"Controlar hemorragia",t_en:"Stabilize",d_en:"Stop bleed"},
+            {s:'cha',xp:150,t:"Radio",d:"Reporte a hospital",t_en:"Radio",d_en:"Report in"},
+            {s:'int',xp:100,t:"Conducir",d:"Manejo ofensivo",t_en:"Drive",d_en:"Defensive drive"}
+        ] 
+    },
+    dentist: { 
+        es: "Dentista", en: "Dentist", 
+        m: [
+            {s:'int',xp:200,t:"Endodoncia",d:"Conducto difícil",t_en:"Root Canal",d_en:"Tricky duct"},
+            {s:'int',xp:150,t:"Anestesia",d:"Cálculo dosis",t_en:"Numb",d_en:"Calc dose"},
+            {s:'str',xp:150,t:"Extracción",d:"Sacar muela",t_en:"Pull",d_en:"Extract tooth"},
+            {s:'str',xp:100,t:"Postura",d:"Dolor de espalda",t_en:"Posture",d_en:"Back pain"},
+            {s:'cha',xp:200,t:"Fobia",d:"Calmar paciente",t_en:"Phobia",d_en:"Calm patient"},
+            {s:'int',xp:100,t:"Estética",d:"Diseño sonrisa",t_en:"Cosmetic",d_en:"Smile design"}
+        ] 
+    },
+    vet: { 
+        es: "Veterinario", en: "Vet", 
+        m: [
+            {s:'str',xp:200,t:"Sujetar",d:"Perro grande",t_en:"Restrain",d_en:"Big dog"},
+            {s:'int',xp:250,t:"Cirugía",d:"Esterilización",t_en:"Surgery",d_en:"Spay/Neuter"},
+            {s:'int',xp:200,t:"Diagnóstico",d:"Interpretar síntomas",t_en:"Dx",d_en:"Read symptoms"},
+            {s:'cha',xp:150,t:"Dueño",d:"Explicar tratamiento",t_en:"Owner",d_en:"Explain plan"},
+            {s:'str',xp:100,t:"Campo",d:"Visita granja",t_en:"Field",d_en:"Farm visit"},
+            {s:'int',xp:100,t:"Lab",d:"Analizar sangre",t_en:"Lab",d_en:"Blood work"}
+        ] 
+    },
+    pharm: { 
+        es: "Farmacéutico", en: "Pharmacist", 
+        m: [
+            {s:'int',xp:200,t:"Verificar",d:"Detectar interacción",t_en:"Verify",d_en:"Check interact"},
+            {s:'int',xp:150,t:"Fórmula",d:"Preparar crema",t_en:"Compound",d_en:"Mix cream"},
+            {s:'cha',xp:150,t:"Mostrador",d:"Aconsejar abuela",t_en:"Counter",d_en:"Advise granny"},
+            {s:'cha',xp:200,t:"Seguro",d:"Pelear cobertura",t_en:"Insurance",d_en:"Fight claim"},
+            {s:'str',xp:100,t:"Stock",d:"Organizar cajas",t_en:"Stock",d_en:"Sort boxes"},
+            {s:'int',xp:100,t:"Regulación",d:"Controlados",t_en:"Laws",d_en:"Controlled meds"}
+        ] 
+    },
+    pt: { 
+        es: "Fisioterapeuta", en: "Physio", 
+        m: [
+            {s:'str',xp:200,t:"Masaje",d:"Descarga muscular",t_en:"Massage",d_en:"Muscle release"},
+            {s:'str',xp:150,t:"Movilización",d:"Mover articulación",t_en:"Mobilize",d_en:"Move joint"},
+            {s:'cha',xp:200,t:"Motivar",d:"Animar en dolor",t_en:"Motivate",d_en:"Encourage"},
+            {s:'int',xp:200,t:"Plan",d:"Diseñar rutina",t_en:"Plan",d_en:"Design routine"},
+            {s:'int',xp:150,t:"Anatomía",d:"Evaluar postura",t_en:"Anatomy",d_en:"Assess posture"},
+            {s:'cha',xp:100,t:"Educar",d:"Enseñar higiene",t_en:"Educate",d_en:"Teach hygiene"}
+        ] 
+    },
+    trainer: { 
+        es: "Entrenador", en: "Trainer", 
+        m: [
+            {s:'str',xp:200,t:"Demo",d:"Enseñar técnica",t_en:"Demo",d_en:"Teach form"},
+            {s:'str',xp:150,t:"Spotter",d:"Ayudar con peso",t_en:"Spot",d_en:"Help lift"},
+            {s:'int',xp:200,t:"Macro",d:"Plan nutricional",t_en:"Macro",d_en:"Nutrition plan"},
+            {s:'int',xp:150,t:"Rutina",d:"Excel de fuerza",t_en:"Routine",d_en:"Strength excel"},
+            {s:'cha',xp:200,t:"Venta",d:"Captar cliente",t_en:"Sales",d_en:"Get client"},
+            {s:'cha',xp:150,t:"Clase",d:"Gritar ánimo",t_en:"Class",d_en:"Yell hype"}
+        ] 
+    },
 
-    // TRANSPORTE
-    trucker: { es: "Camionero", en: "Trucker", m: [{s:'str',xp:200,t:"Conducir",d:"Ruta larga"},{s:'int',xp:100,t:"Logbook",d:"Registro"},{s:'str',xp:100,t:"Revisión",d:"Llantas/Frenos"}] },
-    delivery: { es: "Repartidor", en: "Delivery", m: [{s:'str',xp:150,t:"Entregas",d:"Rápido"},{s:'str',xp:100,t:"Carga",d:"Paquetes"},{s:'cha',xp:50,t:"Cliente",d:"Amabilidad"}] },
-    pilot: { es: "Piloto", en: "Pilot", m: [{s:'int',xp:250,t:"Vuelo",d:"Seguro"},{s:'int',xp:150,t:"Checklist",d:"Pre-vuelo"},{s:'cha',xp:100,t:"Comunicación",d:"Hablar con torre/pasajeros"}] },
-    police: { es: "Policía", en: "Police", m: [{s:'str',xp:150,t:"Patrulla",d:"Vigilancia"},{s:'int',xp:150,t:"Informe",d:"Incidente"},{s:'cha',xp:200,t:"Calmar",d:"Desescalar"}] },
-    fire: { es: "Bombero", en: "Firefighter", m: [{s:'str',xp:300,t:"Incendio",d:"Apagar/Rescatar"},{s:'str',xp:150,t:"Entreno",d:"Físico"},{s:'int',xp:100,t:"Equipo",d:"Limpiar"}] },
-    security: { es: "Seguridad", en: "Security", m: [{s:'str',xp:100,t:"Ronda",d:"Caminar"},{s:'int',xp:100,t:"Cámaras",d:"Observar"},{s:'cha',xp:100,t:"Acceso",d:"Verificar ID"}] },
-    military: { es: "Militar", en: "Military", m: [{s:'str',xp:200,t:"PT / Físico",d:"Entrenamiento duro"},{s:'int',xp:150,t:"Mantenimiento",d:"Limpiar arma/equipo"},{s:'str',xp:150,t:"Maniobras",d:"Ejercicio de campo"}] },
+    // --- 🚚 TRANSPORTE (TRANSPORT) ---
+    trucker: { 
+        es: "Camionero", en: "Trucker", 
+        m: [
+            {s:'str',xp:200,t:"Ruta Larga",d:"Manejar 8 horas",t_en:"Long Haul",d_en:"Drive 8 hours"},
+            {s:'str',xp:150,t:"Carga",d:"Asegurar correas",t_en:"Load",d_en:"Secure straps"},
+            {s:'int',xp:150,t:"Logbook",d:"Registro legal",t_en:"Logbook",d_en:"Legal entry"},
+            {s:'int',xp:100,t:"Mecánica",d:"Revisar frenos",t_en:"Mechanics",d_en:"Check brakes"},
+            {s:'cha',xp:100,t:"Radio",d:"Hablar por CB",t_en:"Radio",d_en:"CB Chat"},
+            {s:'str',xp:100,t:"Descarga",d:"Muelle de carga",t_en:"Unload",d_en:"Loading dock"}
+        ] 
+    },
+    delivery: { 
+        es: "Repartidor", en: "Delivery", 
+        m: [
+            {s:'str',xp:150,t:"Flash",d:"Entrega < 30 min",t_en:"Flash",d_en:"Drop < 30 min"},
+            {s:'str',xp:200,t:"Paquetes",d:"Cargar mochila pesada",t_en:"Packages",d_en:"Heavy bag"},
+            {s:'int',xp:150,t:"Ruta",d:"Optimizar GPS",t_en:"Route",d_en:"Optimize GPS"},
+            {s:'cha',xp:100,t:"Cliente",d:"Propina extra",t_en:"Client",d_en:"Extra tip"},
+            {s:'str',xp:100,t:"Lluvia",d:"Manejar mojado",t_en:"Rain",d_en:"Wet riding"},
+            {s:'int',xp:100,t:"App",d:"Gestionar pedidos",t_en:"App",d_en:"Manage orders"}
+        ] 
+    },
+    pilot: { 
+        es: "Piloto", en: "Pilot", 
+        m: [
+            {s:'int',xp:300,t:"Aterrizaje",d:"Viento cruzado",t_en:"Landing",d_en:"Crosswind"},
+            {s:'int',xp:250,t:"Plan de Vuelo",d:"Calcular combustible",t_en:"Flight Plan",d_en:"Calc fuel"},
+            {s:'int',xp:200,t:"Instrumentos",d:"Vuelo a ciegas",t_en:"IFR",d_en:"Blind flight"},
+            {s:'cha',xp:150,t:"Torre",d:"Comunicación clara",t_en:"Tower",d_en:"Clear comms"},
+            {s:'cha',xp:100,t:"Pasajeros",d:"Mensaje de bienvenida",t_en:"PA",d_en:"Welcome msg"},
+            {s:'str',xp:100,t:"Walkaround",d:"Inspección visual",t_en:"Walkaround",d_en:"Visual check"}
+        ] 
+    },
+    police: { 
+        es: "Policía", en: "Police", 
+        m: [
+            {s:'str',xp:200,t:"Patrulla",d:"Vigilancia activa",t_en:"Patrol",d_en:"Active watch"},
+            {s:'str',xp:250,t:"Persecución",d:"Correr/Manejar",t_en:"Chase",d_en:"Run/Drive"},
+            {s:'int',xp:200,t:"Informe",d:"Papeleo legal",t_en:"Report",d_en:"Paperwork"},
+            {s:'cha',xp:250,t:"Mediación",d:"Desescalar conflicto",t_en:"Mediation",d_en:"De-escalate"},
+            {s:'int',xp:150,t:"Investigar",d:"Buscar pistas",t_en:"Investigate",d_en:"Find clues"},
+            {s:'cha',xp:100,t:"Comunidad",d:"Ayudar turista",t_en:"Community",d_en:"Help tourist"}
+        ] 
+    },
+    fire: { 
+        es: "Bombero", en: "Firefighter", 
+        m: [
+            {s:'str',xp:300,t:"Incendio",d:"Entrar con manguera",t_en:"Fire",d_en:"Enter w/ hose"},
+            {s:'str',xp:250,t:"Rescate",d:"Sacar víctima",t_en:"Rescue",d_en:"Extract victim"},
+            {s:'str',xp:200,t:"Entreno",d:"Subir escaleras con equipo",t_en:"Drill",d_en:"Stairs w/ gear"},
+            {s:'int',xp:150,t:"Hidráulica",d:"Calcular presión",t_en:"Hydraulics",d_en:"Calc pressure"},
+            {s:'int',xp:100,t:"Mantenimiento",d:"Limpiar camión",t_en:"Maint",d_en:"Clean truck"},
+            {s:'cha',xp:100,t:"Escuela",d:"Charla prevención",t_en:"School",d_en:"Safety talk"}
+        ] 
+    },
+    security: { 
+        es: "Seguridad", en: "Security", 
+        m: [
+            {s:'str',xp:150,t:"Ronda",d:"Caminar perímetro",t_en:"Rounds",d_en:"Walk perimeter"},
+            {s:'int',xp:150,t:"CCTV",d:"Observar monitores",t_en:"CCTV",d_en:"Watch screens"},
+            {s:'cha',xp:150,t:"Acceso",d:"Verificar ID",t_en:"Access",d_en:"Check ID"},
+            {s:'cha',xp:200,t:"Expulsar",d:"Sacar borracho",t_en:"Eject",d_en:"Remove drunk"},
+            {s:'int',xp:100,t:"Reporte",d:"Incidencias",t_en:"Report",d_en:"Incidents"},
+            {s:'str',xp:100,t:"Llaves",d:"Abrir/Cerrar",t_en:"Keys",d_en:"Open/Close"}
+        ] 
+    },
+    military: { 
+        es: "Militar", en: "Military", 
+        m: [
+            {s:'str',xp:250,t:"PT",d:"Correr 10km",t_en:"PT",d_en:"Run 10km"},
+            {s:'str',xp:200,t:"Maniobras",d:"Campo de batalla",t_en:"Maneuvers",d_en:"Battlefield"},
+            {s:'int',xp:150,t:"Armamento",d:"Desarmar/Limpiar",t_en:"Weapons",d_en:"Strip/Clean"},
+            {s:'int',xp:100,t:"Guardia",d:"Vigilar 4am",t_en:"Guard",d_en:"4am Watch"},
+            {s:'int',xp:200,t:"Navegación",d:"Mapa y brújula",t_en:"Nav",d_en:"Map & compass"},
+            {s:'cha',xp:150,t:"Liderazgo",d:"Dirigir escuadrón",t_en:"Leadership",d_en:"Lead squad"}
+        ] 
+    },
 
-    // CORPORATIVO
-    lawyer: { es: "Abogado", en: "Lawyer", m: [{s:'int',xp:200,t:"Redactar",d:"Documento legal"},{s:'int',xp:150,t:"Investigar",d:"Leyes"},{s:'cha',xp:200,t:"Negociar",d:"Acuerdo"}] },
-    accountant: { es: "Contador", en: "Accountant", m: [{s:'int',xp:200,t:"Cierre",d:"Bancos"},{s:'int',xp:150,t:"Impuestos",d:"Declaración"},{s:'int',xp:100,t:"Auditoría",d:"Revisar"}] },
-    hr: { es: "RRHH", en: "HR", m: [{s:'cha',xp:150,t:"Entrevista",d:"Candidato"},{s:'int',xp:100,t:"Admin",d:"Contratos"},{s:'cha',xp:200,t:"Conflicto",d:"Mediar"}] },
-    pm: { es: "Project Mgr", en: "Project Mgr", m: [{s:'cha',xp:150,t:"Reunión",d:"Equipo"},{s:'int',xp:200,t:"Plan",d:"Cronograma"},{s:'cha',xp:100,t:"Reporte",d:"Jefes"}] },
-    adminasst: { es: "Asistente", en: "Assistant", m: [{s:'int',xp:100,t:"Email",d:"Limpiar inbox"},{s:'cha',xp:150,t:"Agenda",d:"Coordinar"},{s:'int',xp:100,t:"Archivo",d:"Organizar"}] },
-    realestate: { es: "Real Estate", en: "Real Estate", m: [{s:'str',xp:150,t:"Mostrar",d:"Propiedad"},{s:'cha',xp:100,t:"Llamadas",d:"Leads"},{s:'cha',xp:500,t:"Cierre",d:"Venta"}] },
-    sales_ret: { es: "Vendedor", en: "Sales", m: [{s:'cha',xp:150,t:"Atender",d:"Cliente"},{s:'str',xp:100,t:"Reponer",d:"Stock"},{s:'int',xp:100,t:"Caja",d:"Cobrar"}] },
-    consultant: { es: "Consultor", en: "Consultant", m: [{s:'int',xp:200,t:"Analizar",d:"Datos"},{s:'cha',xp:200,t:"Presentar",d:"Solución"},{s:'int',xp:150,t:"Slides",d:"PowerPoint"}] },
+    // --- 💼 CORPORATIVO (CORPORATE) ---
+    lawyer: { 
+        es: "Abogado", en: "Lawyer", 
+        m: [
+            {s:'int',xp:250,t:"Demanda",d:"Redactar escrito",t_en:"Lawsuit",d_en:"Draft filing"},
+            {s:'int',xp:200,t:"Jurisprudencia",d:"Leer fallos",t_en:"Caselaw",d_en:"Read rulings"},
+            {s:'cha',xp:300,t:"Juicio",d:"Alegato oral",t_en:"Trial",d_en:"Oral argument"},
+            {s:'cha',xp:200,t:"Negociar",d:"Acuerdo extrajudicial",t_en:"Negotiate",d_en:"Settlement"},
+            {s:'int',xp:150,t:"Facturar",d:"Contar horas",t_en:"Billing",d_en:"Track hours"},
+            {s:'cha',xp:100,t:"Cliente",d:"Reunión estresante",t_en:"Client",d_en:"Stress meeting"}
+        ] 
+    },
+    accountant: { 
+        es: "Contador", en: "Accountant", 
+        m: [
+            {s:'int',xp:250,t:"Cierre Anual",d:"Balance general",t_en:"Closing",d_en:"Balance sheet"},
+            {s:'int',xp:200,t:"Impuestos",d:"Evitar multas",t_en:"Tax",d_en:"Avoid fines"},
+            {s:'int',xp:150,t:"Auditoría",d:"Revisar facturas",t_en:"Audit",d_en:"Check invoices"},
+            {s:'int',xp:150,t:"Excel",d:"Tabla dinámica",t_en:"Excel",d_en:"Pivot table"},
+            {s:'cha',xp:100,t:"Explicar",d:"Decir 'no hay plata'",t_en:"Explain",d_en:"Say 'no money'"},
+            {s:'int',xp:100,t:"Nómina",d:"Pagar sueldos",t_en:"Payroll",d_en:"Pay salaries"}
+        ] 
+    },
+    hr: { 
+        es: "RRHH", en: "HR", 
+        m: [
+            {s:'cha',xp:200,t:"Entrevista",d:"Filtrar candidato",t_en:"Interview",d_en:"Screening"},
+            {s:'cha',xp:250,t:"Despido",d:"Trámite difícil",t_en:"Firing",d_en:"Hard task"},
+            {s:'int',xp:150,t:"Contrato",d:"Redactar cláusulas",t_en:"Contract",d_en:"Draft clauses"},
+            {s:'cha',xp:150,t:"Clima",d:"Organizar evento",t_en:"Culture",d_en:"Plan event"},
+            {s:'int',xp:100,t:"Nómina",d:"Revisar horas",t_en:"Payroll",d_en:"Check hours"},
+            {s:'int',xp:100,t:"Legal",d:"Normativa laboral",t_en:"Legal",d_en:"Labor laws"}
+        ] 
+    },
+    pm: { 
+        es: "Project Mgr", en: "Project Mgr", 
+        m: [
+            {s:'cha',xp:200,t:"Reunión",d:"Daily Stand-up",t_en:"Meeting",d_en:"Daily Stand-up"},
+            {s:'int',xp:250,t:"Cronograma",d:"Ajustar Gantt",t_en:"Schedule",d_en:"Fix Gantt"},
+            {s:'cha',xp:200,t:"Stakeholders",d:"Calmar jefes",t_en:"Stakeholders",d_en:"Calm bosses"},
+            {s:'int',xp:150,t:"Riesgos",d:"Plan de contingencia",t_en:"Risks",d_en:"Backup plan"},
+            {s:'int',xp:100,t:"Jira",d:"Mover tickets",t_en:"Jira",d_en:"Move tickets"},
+            {s:'cha',xp:100,t:"Equipo",d:"Desbloquear tareas",t_en:"Team",d_en:"Unblock tasks"}
+        ] 
+    },
+    adminasst: { 
+        es: "Asistente", en: "Assistant", 
+        m: [
+            {s:'int',xp:150,t:"Agenda",d:"Tetris de reuniones",t_en:"Agenda",d_en:"Meeting Tetris"},
+            {s:'int',xp:100,t:"Email",d:"Limpiar Inbox 0",t_en:"Email",d_en:"Inbox Zero"},
+            {s:'cha',xp:150,t:"Teléfono",d:"Filtrar llamadas",t_en:"Phone",d_en:"Screen calls"},
+            {s:'int',xp:100,t:"Viajes",d:"Reservar vuelos",t_en:"Travel",d_en:"Book flights"},
+            {s:'str',xp:50,t:"Café",d:"Preparar sala",t_en:"Coffee",d_en:"Prep room"},
+            {s:'int',xp:100,t:"Actas",d:"Tomar notas",t_en:"Minutes",d_en:"Take notes"}
+        ] 
+    },
+    realestate: { 
+        es: "Real Estate", en: "Real Estate", 
+        m: [
+            {s:'str',xp:150,t:"Mostrar",d:"Recorrer casas",t_en:"Showing",d_en:"Walkthrough"},
+            {s:'cha',xp:200,t:"Llamadas",d:"Buscar captaciones",t_en:"Calls",d_en:"Cold calling"},
+            {s:'cha',xp:300,t:"Cierre",d:"Firmar escritura",t_en:"Closing",d_en:"Sign deed"},
+            {s:'int',xp:150,t:"Contrato",d:"Revisar papeles",t_en:"Contract",d_en:"Review paperwork"},
+            {s:'cha',xp:100,t:"Open House",d:"Recibir gente",t_en:"Open House",d_en:"Greet people"},
+            {s:'int',xp:100,t:"Fotos",d:"Publicar aviso",t_en:"Photos",d_en:"Post listing"}
+        ] 
+    },
+    sales_ret: { 
+        es: "Vendedor", en: "Sales", 
+        m: [
+            {s:'cha',xp:200,t:"Convencer",d:"Manejar objeciones",t_en:"Persuade",d_en:"Handle objections"},
+            {s:'cha',xp:150,t:"Prospección",d:"Llamadas en frío",t_en:"Prospect",d_en:"Cold calls"},
+            {s:'int',xp:100,t:"CRM",d:"Actualizar datos",t_en:"CRM",d_en:"Update data"},
+            {s:'str',xp:100,t:"Stock",d:"Ordenar estante",t_en:"Stock",d_en:"Tidy shelf"},
+            {s:'int',xp:150,t:"Caja",d:"Cobrar/Facturar",t_en:"Register",d_en:"Ring up"},
+            {s:'cha',xp:250,t:"Cierre",d:"Lograr la meta",t_en:"Closing",d_en:"Hit quota"}
+        ] 
+    },
+    consultant: { 
+        es: "Consultor", en: "Consultant", 
+        m: [
+            {s:'int',xp:250,t:"Análisis",d:"Diagnóstico empresa",t_en:"Analysis",d_en:"Company dx"},
+            {s:'cha',xp:250,t:"Presentar",d:"Convencer directorio",t_en:"Present",d_en:"Convince board"},
+            {s:'int',xp:200,t:"Slides",d:"PowerPoint infinito",t_en:"Slides",d_en:"Endless PPT"},
+            {s:'str',xp:100,t:"Viaje",d:"Aeropuerto 5am",t_en:"Travel",d_en:"Airport 5am"},
+            {s:'int',xp:150,t:"Excel",d:"Modelo financiero",t_en:"Excel",d_en:"Finance model"},
+            {s:'cha',xp:150,t:"Workshop",d:"Facilitar taller",t_en:"Workshop",d_en:"Lead session"}
+        ] 
+    },
 
-    // TECH / CREATIVO
-    dev: { es: "Programador", en: "Developer", m: [{s:'str',xp:100,t:"Código",d:"1h foco"},{s:'int',xp:150,t:"Debug",d:"Arreglar"},{s:'str',xp:300,t:"Deploy",d:"Publicar"}] },
-    designer: { es: "Diseñador", en: "Designer", m: [{s:'int',xp:150,t:"Diseñar",d:"Crear"},{s:'cha',xp:100,t:"Feedback",d:"Cliente"},{s:'int',xp:100,t:"Exportar",d:"Archivos"}] },
-    photo: { es: "Fotógrafo", en: "Photographer", m: [{s:'str',xp:200,t:"Fotos",d:"Sesión"},{s:'int',xp:150,t:"Editar",d:"Lightroom"},{s:'cha',xp:100,t:"Dirigir",d:"Modelo"}] },
-    video: { es: "Videógrafo", en: "Videographer", m: [{s:'str',xp:200,t:"Grabar",d:"Rodaje"},{s:'int',xp:200,t:"Editar",d:"Corte/Color"},{s:'int',xp:100,t:"Render",d:"Exportar"}] },
-    architect: { es: "Arquitecto", en: "Architect", m: [{s:'int',xp:200,t:"Plano",d:"Dibujar"},{s:'str',xp:150,t:"Visita",d:"Obra"},{s:'cha',xp:100,t:"Cliente",d:"Presentar"}] },
-    musician: { es: "Músico", en: "Musician", m: [{s:'str',xp:150,t:"Ensayo",d:"Practicar"},{s:'cha',xp:200,t:"Show",d:"En vivo"},{s:'int',xp:150,t:"Componer",d:"Escribir"}] },
-    tattoo: { es: "Tatuador", en: "Tattooist", m: [{s:'str',xp:250,t:"Tatuar",d:"Sesión"},{s:'int',xp:100,t:"Diseño",d:"Dibujo"},{s:'int',xp:100,t:"Higiene",d:"Limpiar"}] },
+    // --- 🎨 CREATIVO (CREATIVE) ---
+    dev: { 
+        es: "Programador", en: "Developer", 
+        m: [
+            {s:'int',xp:250,t:"Código",d:"Feature nueva",t_en:"Code",d_en:"New feature"},
+            {s:'int',xp:300,t:"Debug",d:"Encontrar el bug",t_en:"Debug",d_en:"Find bug"},
+            {s:'int',xp:150,t:"Refactor",d:"Limpiar código",t_en:"Refactor",d_en:"Clean code"},
+            {s:'str',xp:100,t:"Deploy",d:"Subir a producción",t_en:"Deploy",d_en:"Push to prod"},
+            {s:'cha',xp:100,t:"Daily",d:"Explicar qué hiciste",t_en:"Daily",d_en:"Status update"},
+            {s:'int',xp:100,t:"Docs",d:"Leer API",t_en:"Docs",d_en:"Read API"}
+        ] 
+    },
+    designer: { 
+        es: "Diseñador", en: "Designer", 
+        m: [
+            {s:'int',xp:200,t:"UI",d:"Diseñar interfaz",t_en:"UI",d_en:"Design interface"},
+            {s:'int',xp:150,t:"UX",d:"Mapa de usuario",t_en:"UX",d_en:"User map"},
+            {s:'cha',xp:200,t:"Feedback",d:"Cliente pide cambios",t_en:"Feedback",d_en:"Client changes"},
+            {s:'int',xp:150,t:"Branding",d:"Crear logo",t_en:"Branding",d_en:"Create logo"},
+            {s:'int',xp:100,t:"Exportar",d:"Preparar assets",t_en:"Export",d_en:"Prep assets"},
+            {s:'cha',xp:100,t:"Inspiración",d:"Buscar referencias",t_en:"Inspo",d_en:"Find refs"}
+        ] 
+    },
+    photo: { 
+        es: "Fotógrafo", en: "Photographer", 
+        m: [
+            {s:'str',xp:200,t:"Shooting",d:"Sesión 4 horas",t_en:"Shooting",d_en:"4hr Session"},
+            {s:'int',xp:200,t:"Edición",d:"Lightroom/Photoshop",t_en:"Edit",d_en:"LR/Photoshop"},
+            {s:'cha',xp:150,t:"Dirección",d:"Guiar modelo",t_en:"Direct",d_en:"Guide model"},
+            {s:'int',xp:100,t:"Equipo",d:"Limpiar lentes",t_en:"Gear",d_en:"Clean lens"},
+            {s:'int',xp:100,t:"Selección",d:"Filtrar fotos",t_en:"Culling",d_en:"Filter photos"},
+            {s:'cha',xp:100,t:"Entrega",d:"Enviar galería",t_en:"Deliver",d_en:"Send gallery"}
+        ] 
+    },
+    video: { 
+        es: "Videógrafo", en: "Videographer", 
+        m: [
+            {s:'str',xp:250,t:"Rodaje",d:"Cámara al hombro",t_en:"Shoot",d_en:"Shoulder rig"},
+            {s:'int',xp:250,t:"Montaje",d:"Premiere Pro",t_en:"Edit",d_en:"Premiere Pro"},
+            {s:'int',xp:150,t:"Color",d:"Grading",t_en:"Color",d_en:"Grading"},
+            {s:'int',xp:150,t:"Sonido",d:"Mezclar audio",t_en:"Sound",d_en:"Mix audio"},
+            {s:'int',xp:100,t:"Guión",d:"Storyboard",t_en:"Script",d_en:"Storyboard"},
+            {s:'str',xp:100,t:"Luces",d:"Armar set",t_en:"Lights",d_en:"Setup rig"}
+        ] 
+    },
+    architect: { 
+        es: "Arquitecto", en: "Architect", 
+        m: [
+            {s:'int',xp:250,t:"Plano",d:"AutoCAD detallado",t_en:"Drafting",d_en:"AutoCAD"},
+            {s:'int',xp:200,t:"Render",d:"Visualización 3D",t_en:"Render",d_en:"3D Viz"},
+            {s:'str',xp:150,t:"Obra",d:"Visita inspección",t_en:"Site",d_en:"Inspection visit"},
+            {s:'cha',xp:200,t:"Cliente",d:"Defender diseño",t_en:"Client",d_en:"Defend design"},
+            {s:'int',xp:150,t:"Normativa",d:"Revisar leyes",t_en:"Codes",d_en:"Check laws"},
+            {s:'int',xp:100,t:"Maqueta",d:"Corte y pegado",t_en:"Model",d_en:"Cut & glue"}
+        ] 
+    },
+    musician: { 
+        es: "Músico", en: "Musician", 
+        m: [
+            {s:'str',xp:150,t:"Ensayo",d:"Practicar escalas",t_en:"Practice",d_en:"Scales"},
+            {s:'cha',xp:250,t:"Concierto",d:"Show en vivo",t_en:"Gig",d_en:"Live show"},
+            {s:'int',xp:200,t:"Componer",d:"Escribir letra/música",t_en:"Compose",d_en:"Write songs"},
+            {s:'int',xp:150,t:"Grabar",d:"Estudio",t_en:"Record",d_en:"Studio"},
+            {s:'str',xp:100,t:"Cargar",d:"Mover amplificadores",t_en:"Load",d_en:"Move amps"},
+            {s:'cha',xp:100,t:"Redes",d:"Promoción",t_en:"Socials",d_en:"Promo"}
+        ] 
+    },
+    tattoo: { 
+        es: "Tatuador", en: "Tattooist", 
+        m: [
+            {s:'str',xp:300,t:"Tatuar",d:"Sesión larga",t_en:"Inking",d_en:"Long session"},
+            {s:'int',xp:200,t:"Diseño",d:"Dibujar en iPad",t_en:"Design",d_en:"Draw on iPad"},
+            {s:'int',xp:150,t:"Stencil",d:"Preparar calco",t_en:"Stencil",d_en:"Prep transfer"},
+            {s:'int',xp:100,t:"Higiene",d:"Esterilizar",t_en:"Hygiene",d_en:"Sterilize"},
+            {s:'cha',xp:150,t:"Cliente",d:"Calmar dolor",t_en:"Client",d_en:"Calm pain"},
+            {s:'cha',xp:100,t:"Foto",d:"Portafolio",t_en:"Photo",d_en:"Portfolio"}
+        ] 
+    },
 
-    // ESTUDIANTES
-    stu_hs: { es: "Est. Secundaria", en: "HS Student", m: [{s:'str',xp:100,t:"Tarea",d:"A tiempo"},{s:'int',xp:200,t:"Examen",d:"Aprobar"},{s:'str',xp:150,t:"Deporte",d:"Clase"}] },
-    stu_med: { es: "Est. Medicina", en: "Med Student", m: [{s:'int',xp:150,t:"Estudiar",d:"Flashcards"},{s:'str',xp:200,t:"Práctica",d:"Hospital"},{s:'int',xp:250,t:"Parcial",d:"Examen"}] },
-    stu_law: { es: "Est. Derecho", en: "Law Student", m: [{s:'int',xp:200,t:"Leer",d:"Casos"},{s:'cha',xp:150,t:"Debate",d:"Clase"},{s:'int',xp:100,t:"Memorizar",d:"Leyes"}] },
-    stu_eng: { es: "Est. Ingeniería", en: "Eng Student", m: [{s:'int',xp:150,t:"Ejercicios",d:"Problemas"},{s:'str',xp:200,t:"Proyecto",d:"Construir"},{s:'int',xp:200,t:"Cálculo",d:"Mate"}] },
-    stu_arts: { es: "Est. Artes", en: "Arts Student", m: [{s:'str',xp:200,t:"Ensayo",d:"Escribir"},{s:'int',xp:150,t:"Lectura",d:"Libros"},{s:'cha',xp:100,t:"Clase",d:"Participar"}] },
-    stu_biz: { es: "Est. Negocios", en: "Biz Student", m: [{s:'cha',xp:150,t:"Presentar",d:"Exponer"},{s:'int',xp:150,t:"Caso",d:"Analizar"},{s:'cha',xp:100,t:"Evento",d:"Networking"}] },
-    stu_sci: { es: "Est. Ciencias", en: "Sci Student", m: [{s:'str',xp:200,t:"Lab",d:"Experimento"},{s:'int',xp:150,t:"Reporte",d:"Escribir"},{s:'int',xp:150,t:"Teoría",d:"Estudiar"}] }
+    // --- 🎓 ESTUDIANTES (STUDENTS) ---
+    stu_hs: { 
+        es: "Est. Secundaria", en: "HS Student", 
+        m: [
+            {s:'str',xp:100,t:"Tarea",d:"Matemáticas y Lengua",t_en:"Homework",d_en:"Math & English"},
+            {s:'int',xp:200,t:"Examen Final",d:"Estudiar toda la noche",t_en:"Final Exam",d_en:"All-nighter"},
+            {s:'str',xp:150,t:"Deporte",d:"Clase de educación física",t_en:"Sports",d_en:"PE Class"},
+            {s:'cha',xp:100,t:"Recreo",d:"Socializar con amigos",t_en:"Recess",d_en:"Hang with friends"},
+            {s:'cha',xp:150,t:"Club",d:"Debate o Teatro",t_en:"Club",d_en:"Debate or Drama"},
+            {s:'int',xp:100,t:"SATs",d:"Preparar ingreso a Uni",t_en:"SATs",d_en:"Prep for Uni"}
+        ] 
+    },
+    stu_med: { 
+        es: "Est. Medicina", en: "Med Student", 
+        m: [
+            {s:'int',xp:150,t:"Anatomía",d:"Memorizar huesos",t_en:"Anatomy",d_en:"Memorize bones"},
+            {s:'int',xp:200,t:"Farmacología",d:"Estudiar drogas",t_en:"Pharma",d_en:"Study drugs"},
+            {s:'str',xp:200,t:"Prácticas",d:"Ronda en hospital",t_en:"Rounds",d_en:"Hospital work"},
+            {s:'str',xp:150,t:"Guardia",d:"Sin dormir 24h",t_en:"Shift",d_en:"No sleep 24h"},
+            {s:'cha',xp:100,t:"Paciente",d:"Historial clínico",t_en:"Patient",d_en:"Take history"},
+            {s:'int',xp:250,t:"Examen",d:"Parcial imposible",t_en:"Exam",d_en:"Impossible test"}
+        ] 
+    },
+    stu_law: { 
+        es: "Est. Derecho", en: "Law Student", 
+        m: [
+            {s:'int',xp:200,t:"Leer",d:"500 páginas de fallos",t_en:"Read",d_en:"500 pages rulings"},
+            {s:'cha',xp:200,t:"Moot Court",d:"Simulacro de juicio",t_en:"Moot Court",d_en:"Mock trial"},
+            {s:'int',xp:150,t:"Constitucional",d:"Memorizar artículos",t_en:"Const. Law",d_en:"Memorize articles"},
+            {s:'int',xp:150,t:"Biblioteca",d:"Noche de estudio",t_en:"Library",d_en:"Study night"},
+            {s:'cha',xp:100,t:"Debate",d:"Discutir en clase",t_en:"Debate",d_en:"Argue in class"},
+            {s:'str',xp:50,t:"Café",d:"Sobrevivir",t_en:"Coffee",d_en:"Survive"}
+        ] 
+    },
+    stu_eng: { 
+        es: "Est. Ingeniería", en: "Eng Student", 
+        m: [
+            {s:'int',xp:200,t:"Cálculo III",d:"Integrales triples",t_en:"Calc III",d_en:"Triple integrals"},
+            {s:'int',xp:200,t:"Física",d:"Mecánica clásica",t_en:"Physics",d_en:"Mechanics"},
+            {s:'str',xp:150,t:"Proyecto",d:"Construir robot",t_en:"Project",d_en:"Build robot"},
+            {s:'int',xp:150,t:"Código",d:"Laboratorio de C++",t_en:"Code",d_en:"C++ Lab"},
+            {s:'cha',xp:100,t:"Grupo",d:"Coordinar trabajo",t_en:"Group",d_en:"Coord team"},
+            {s:'int',xp:100,t:"Química",d:"Laboratorio",t_en:"Chem",d_en:"Lab work"}
+        ] 
+    },
+    stu_arts: { 
+        es: "Est. Artes", en: "Arts Student", 
+        m: [
+            {s:'str',xp:200,t:"Taller",d:"Pintura/Escultura",t_en:"Workshop",d_en:"Paint/Sculpt"},
+            {s:'int',xp:150,t:"Historia",d:"Arte del Renacimiento",t_en:"History",d_en:"Renaissance Art"},
+            {s:'cha',xp:150,t:"Crítica",d:"Defender tu obra",t_en:"Critique",d_en:"Defend work"},
+            {s:'str',xp:150,t:"Bocetos",d:"Dibujo rápido",t_en:"Sketch",d_en:"Quick draw"},
+            {s:'cha',xp:100,t:"Galería",d:"Visita museo",t_en:"Gallery",d_en:"Museum visit"},
+            {s:'int',xp:100,t:"Ensayo",d:"Escribir paper",t_en:"Essay",d_en:"Write paper"}
+        ] 
+    },
+    stu_biz: { 
+        es: "Est. Negocios", en: "Biz Student", 
+        m: [
+            {s:'cha',xp:200,t:"Presentación",d:"Hablar en público",t_en:"Presentation",d_en:"Public speaking"},
+            {s:'int',xp:150,t:"Contabilidad",d:"Balance básico",t_en:"Accounting",d_en:"Basic balance"},
+            {s:'int',xp:150,t:"Caso",d:"Analizar empresa",t_en:"Case Study",d_en:"Analyze firm"},
+            {s:'cha',xp:150,t:"Networking",d:"Evento social",t_en:"Networking",d_en:"Social event"},
+            {s:'int',xp:100,t:"Excel",d:"Finanzas 101",t_en:"Excel",d_en:"Finance 101"},
+            {s:'cha',xp:100,t:"Grupo",d:"Liderar equipo",t_en:"Group",d_en:"Lead team"}
+        ] 
+    },
+    stu_sci: { 
+        es: "Est. Ciencias", en: "Sci Student", 
+        m: [
+            {s:'str',xp:150,t:"Laboratorio",d:"Experimento largo",t_en:"Lab",d_en:"Long experiment"},
+            {s:'int',xp:200,t:"Reporte",d:"Escribir resultados",t_en:"Report",d_en:"Write results"},
+            {s:'int',xp:150,t:"Estadística",d:"Analizar datos",t_en:"Stats",d_en:"Analyze data"},
+            {s:'int',xp:150,t:"Teoría",d:"Leer papers",t_en:"Theory",d_en:"Read papers"},
+            {s:'int',xp:200,t:"Tesis",d:"Investigación",t_en:"Thesis",d_en:"Research"},
+            {s:'cha',xp:50,t:"Seminario",d:"Escuchar charla",t_en:"Seminar",d_en:"Listen talk"}
+        ] 
+    }
 };
 
 const GROUPS = {
-    // WORK
     "🛠️ OFICIOS": ["mechanic","electric","plumber","welder","carpenter","hvac","mason","painter","landscaper","pw","pest","locksmith","roofer","solar"],
     "🤝 SERVICIO": ["chef","bartender","barista","server","frontdesk","flightatt","eventplan"],
     "🏥 SALUD": ["doctor","nurse","emt","dentist","vet","pharm","pt","trainer"],
     "🚚 TRANSPORTE": ["trucker","delivery","pilot","police","fire","security","military"],
     "💼 CORPORATIVO": ["lawyer","accountant","hr","pm","adminasst","realestate","sales_ret","consultant"],
     "🎨 CREATIVO": ["dev","designer","photo","video","architect","musician","tattoo"],
-    // STUDY
     "🎓 ESTUDIANTES": ["stu_hs","stu_med","stu_law","stu_eng","stu_arts","stu_biz","stu_sci"]
 };
 
@@ -238,22 +848,34 @@ const T = {
     en: { t_create:"CREATE PROFILE", l_name:"Name", l_clan:"Clan", l_job:"Profession", b_start:"START", l_lvl:"Level", s_str:"STRENGTH", s_cha:"CHARISMA", s_int:"MIND", b_reset:"Reset", t_danger:"DANGER ZONE", d_reset:"Name to delete:", b_del:"DELETE", b_sync:"SAVE CLOUD", clans:["🦁 Lions","🦊 Foxes","🔮 Mages","🐍 Serpents","🐐 Goats"] }
 };
 
-let lang='es', mode='work', player={name:"",clan:"",jobKey:"",lvl:1,xp:0,next:1000,stats:{str:0,cha:0,int:0}};
+/* --- VARIABLES GLOBALES Y ESTADO DEL JUGADOR --- */
+let lang='es', mode='work';
+let player={
+    name:"", clan:"", jobKey:"", lvl:1, xp:0, next:1000, 
+    stats:{str:0,cha:0,int:0},
+    coins: 0,
+    titles: [], 
+    activeTitle: "", 
+    lastThreshold: 0
+};
 
 window.onload = () => {
     try {
         lang = localStorage.getItem('rpg_lang') || 'es';
-        setLang(lang, false);
+        document.getElementById('btn-es').classList.toggle('active', lang==='es');
+        document.getElementById('btn-en').classList.toggle('active', lang==='en');
+        updateStaticText();
+
         const clanSel = document.getElementById('inp-clan');
         clanSel.innerHTML = "";
         T[lang].clans.forEach((c, i) => { let o = document.createElement('option'); o.value = i; o.innerText = c; clanSel.appendChild(o); });
 
-        // INICIAR EN MODO TRABAJO PARA QUE LA LISTA NO ESTÉ VACÍA
         setMode('work');
 
         const save = localStorage.getItem('rpg_save_connected');
         if(save) {
-            player = JSON.parse(save);
+            const loaded = JSON.parse(save);
+            player = { ...player, ...loaded };
             if(!player.stats) player.stats={str:0,cha:0,int:0};
             initGame();
         } else {
@@ -261,6 +883,12 @@ window.onload = () => {
         }
     } catch(e) { document.getElementById('error-msg').style.display='block'; }
 };
+
+function updateStaticText() {
+    document.querySelectorAll('[data-t]').forEach(e => { 
+        if(T[lang][e.dataset.t]) e.innerText = T[lang][e.dataset.t]; 
+    });
+}
 
 function setMode(m) {
     mode = m;
@@ -270,11 +898,8 @@ function setMode(m) {
     const jobSel = document.getElementById('inp-job');
     jobSel.innerHTML = "";
     
-    // FILTRADO ROBUSTO
     for (const [gName, keys] of Object.entries(GROUPS)) {
         const isStu = gName === "🎓 ESTUDIANTES";
-        // Si modo estudio: Solo mostrar Estudiantes
-        // Si modo trabajo: Mostrar todo MENOS Estudiantes
         if ((m === 'study' && isStu) || (m === 'work' && !isStu)) {
             const grp = document.createElement('optgroup');
             grp.label = gName;
@@ -291,12 +916,10 @@ function setMode(m) {
     }
 }
 
-function setLang(l, r=true) {
-    lang = l; localStorage.setItem('rpg_lang', l);
-    document.getElementById('btn-es').classList.toggle('active', l==='es');
-    document.getElementById('btn-en').classList.toggle('active', l==='en');
-    document.querySelectorAll('[data-t]').forEach(e => { if(T[l][e.dataset.t]) e.innerText = T[l][e.dataset.t]; });
-    if(r) location.reload();
+function setLang(l) {
+    lang = l; 
+    localStorage.setItem('rpg_lang', l);
+    location.reload();
 }
 
 function startGame() {
@@ -315,7 +938,10 @@ function initGame() {
 }
 
 function renderUI() {
-    document.getElementById('ui-name').innerText = player.name;
+    const titleText = player.activeTitle ? `[${player.activeTitle}] ` : "";
+    document.getElementById('ui-name').innerText = titleText + player.name;
+    document.getElementById('ui-coins').innerText = player.coins;
+
     const jd = JOBS_DB[player.jobKey];
     document.getElementById('ui-job').innerText = jd ? jd[lang] : "Job";
     document.getElementById('ui-clan').innerText = player.clan.split(' ')[0]+" "+player.clan.split(' ')[1];
@@ -328,6 +954,7 @@ function renderUI() {
     document.getElementById('ui-xp').style.width = pct+"%";
     document.getElementById('ui-xp-txt').innerText = Math.floor(player.xp)+"/"+player.next;
     document.getElementById('reset-hint').innerText = player.name;
+    
     renderMissions();
 }
 
@@ -341,11 +968,16 @@ function renderMissions() {
         if(sub.length > 0) {
             const grp = document.createElement('div'); grp.className='m-group';
             const h = document.createElement('div'); h.className='m-head'; h.innerText=T[lang]['s_'+stat]; grp.appendChild(h);
+            
             sub.forEach(m => {
                 const b = document.createElement('div'); b.className='m-btn'; b.onclick=()=>gain(m.xp, m.s);
-                const ti = m.t_es ? (lang==='es'?m.t_es:m.t_en) : m.t;
-                const de = m.d_es ? (lang==='es'?m.d_es:m.d_en) : m.d;
-                b.innerHTML = `<div class="m-info"><span class="m-title">${ti}</span><span class="m-desc">${de}</span></div><div class="xp-badge">+${m.xp}</div>`;
+                let title = m.t;
+                let desc = m.d;
+                if (lang === 'en') {
+                    if (m.t_en) title = m.t_en;
+                    if (m.d_en) desc = m.d_en;
+                }
+                b.innerHTML = `<div class="m-info"><span class="m-title">${title}</span><span class="m-desc">${desc}</span></div><div class="xp-badge">+${m.xp}</div>`;
                 grp.appendChild(b);
             });
             area.appendChild(grp);
@@ -354,31 +986,72 @@ function renderMissions() {
 }
 
 function gain(xp, s) {
-    player.xp+=xp; player.stats[s]++;
-    if(player.xp >= player.next) { player.lvl++; player.xp-=player.next; player.next=Math.floor(player.next*1.2); toast("🎉 LEVEL UP!"); }
-    else toast(`+${xp} XP`);
+    player.xp += xp; 
+    player.stats[s]++;
+    let currentPct = (player.xp / player.next) * 100;
+    while (currentPct >= player.lastThreshold + 15 && player.lastThreshold < 90) {
+        player.lastThreshold += 15;
+        player.coins++;
+        toast("🪙 Coin Get!");
+    }
+    if(player.xp >= player.next) { 
+        player.lvl++; 
+        player.xp -= player.next; 
+        player.next = Math.floor(player.next * 1.2);
+        player.lastThreshold = 0;
+        toast("🎉 LEVEL UP!"); 
+    } else {
+        toast(`+${xp} XP`);
+    }
     save(); renderUI();
 }
 
-// FUNCIÓN DE SINCRONIZACIÓN CORREGIDA
-function syncData() {
-    const d = {
-        name: player.name,
-        level: player.lvl,
-        job: JOBS_DB[player.jobKey] ? JOBS_DB[player.jobKey][lang] : "Unknown",
-        stats: `S:${player.stats.str} C:${player.stats.cha} I:${player.stats.int}`
-    };
+function openShop() {
+    const list = document.getElementById('shop-list');
+    document.getElementById('shop-coins').innerText = player.coins;
+    list.innerHTML = "";
 
-    fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(d)
-    })
-    .then(r => {
-        if(r.ok) toast("✅ Saved to Cloud!");
-        else toast("❌ Error Saving");
-    })
-    .catch(() => toast("❌ Connection Error"));
+    SHOP_ITEMS.forEach(item => {
+        const div = document.createElement('div');
+        const owned = player.titles.includes(item.id);
+        const equipped = player.activeTitle === item.name;
+        
+        div.className = `shop-item ${owned ? 'owned' : ''}`;
+        let btnHTML = "";
+        if (equipped) {
+            btnHTML = `<button class="btn-equipped">Usando</button>`;
+        } else if (owned) {
+            btnHTML = `<button class="btn-equip" onclick="equipTitle('${item.name}')">Equipar</button>`;
+        } else {
+            btnHTML = `<button class="btn-buy" onclick="buyTitle('${item.id}', ${item.price})">🪙 ${item.price}</button>`;
+        }
+        div.innerHTML = `<div><strong>${item.name}</strong></div>${btnHTML}`;
+        list.appendChild(div);
+    });
+    document.getElementById('modal-shop').style.display = 'flex';
+}
+
+function closeShop() { document.getElementById('modal-shop').style.display = 'none'; }
+
+function buyTitle(id, price) {
+    if (player.coins >= price) {
+        player.coins -= price;
+        player.titles.push(id);
+        toast("✅ Comprado!");
+        save();
+        openShop(); 
+        renderUI(); 
+    } else {
+        toast("❌ Falta dinero");
+    }
+}
+
+function equipTitle(name) {
+    player.activeTitle = name;
+    toast("✨ Equipado");
+    save();
+    openShop();
+    renderUI();
 }
 
 function toast(m) { const t=document.getElementById('toast'); t.innerText=m; t.style.opacity=1; t.style.bottom="40px"; setTimeout(()=>{t.style.opacity=0;t.style.bottom="30px"},2000); }
