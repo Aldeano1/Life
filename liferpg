@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <title>RPG Life</title>
+    <title>RPG Life: Student Edition</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --primary: #3b82f6; --accent: #8b5cf6; --gold: #f59e0b; --danger: #ef4444; --text: #f8fafc; --muted: #94a3b8; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
@@ -39,7 +39,7 @@
 
         .profile-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid #334155; position: relative; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
         
-        /* ALINEACIÓN CORRECTA: MONEDA + CLAN ARRIBA */
+        /* ALINEACIÓN (Monedas Izq - Clan Der - Nombre Centro) */
         .top-row { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 5px; }
         .coin-display { background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 15px; border: 1px solid var(--gold); color: var(--gold); font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; }
         .clan-tag { background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; font-size: 10px; color: var(--accent); border: 1px solid var(--accent); }
@@ -67,12 +67,6 @@
         .m-desc { font-size: 11px; color: var(--muted); }
         .xp-badge { background: rgba(255,255,255,0.08); padding: 6px 10px; border-radius: 8px; font-size: 12px; color: var(--gold); font-weight: bold; min-width: 50px; text-align: center; }
 
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; padding: 10px 20px; border-radius: 30px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 99; width: 80%; text-align: center; }
-        .settings-link { display: block; text-align: center; color: #475569; font-size: 12px; text-decoration: underline; margin-top: 20px; cursor: pointer; padding: 10px; }
-        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
-        .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 100%; max-width: 320px; text-align: center; border: 1px solid var(--danger); }
-        #error-msg { display:none; color:white; background:#ef4444; padding:20px; position:fixed; top:0; left:0; width:100%; z-index:9999; text-align:center; }
-
         /* ESTILOS DE LA TIENDA */
         .shop-btn { background: #7c3aed; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: center; gap: 8px; }
         .shop-item { background: #0f172a; border: 1px solid #334155; padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
@@ -82,6 +76,11 @@
         .btn-equip { background: var(--primary); color: white; }
         .btn-equipped { background: var(--muted); color: white; cursor: default; }
 
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--gold); color: black; padding: 10px 20px; border-radius: 30px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 99; width: 80%; text-align: center; }
+        .settings-link { display: block; text-align: center; color: #475569; font-size: 12px; text-decoration: underline; margin-top: 20px; cursor: pointer; padding: 10px; }
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+        .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 100%; max-width: 320px; text-align: center; border: 1px solid var(--danger); }
+        #error-msg { display:none; color:white; background:#ef4444; padding:20px; position:fixed; top:0; left:0; width:100%; z-index:9999; text-align:center; }
     </style>
 </head>
 <body>
@@ -165,20 +164,35 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// AQUÍ VAN LOS ITEMS DE LA TIENDA (Edita los precios aquí si quieres)
+// --- DATOS DE LA TIENDA ---
 const SHOP_ITEMS = [
-    { id: 't1', name: "El Novato", price: 1 },
-    { id: 't2', name: "El Aprendiz", price: 3 },
-    { id: 't3', name: "El Experto", price: 5 },
-    { id: 't4', name: "El Maestro", price: 10 },
-    { id: 't5', name: "Leyenda", price: 20 },
-    { id: 't6', name: "El Imparable", price: 30 },
-    { id: 't7', name: "Dios del Trabajo", price: 50 }
+    { id: 't1', name: "El Novato", price: 15 },
+    { id: 't2', name: "El Aprendiz", price: 25 },
+    { id: 't3', name: "El Experto", price: 40 },
+    { id: 't4', name: "El Maestro", price: 80 },
+    { id: 't5', name: "Leyenda", price: 140 },
+    { id: 't6', name: "El Imparable", price: 300 },
+    { id: 't7', name: "Dios del Trabajo", price: 600 }
 ];
 
-/* AQUÍ ABAJO EMPIEZA LO QUE YA TENÍAS (JOBS_DB) */
-
+// --- BASE DE DATOS DE OFICIOS Y ESTUDIOS ---
 const JOBS_DB = {
+    // --- ESTUDIANTE UNIVERSITARIO GENERAL (NUEVO) ---
+    stu_gen: { 
+        es: "Estudiante General", en: "General Student", 
+        m: [
+            {s:'str',xp:100,t:"Hacer tareas",d:"¡Otra más, nooo!",t_en:"Complete Homework",d_en:"Another one, nooo!"},
+            {s:'int',xp:150,t:"Comer Ramen",d:"Sobrevivir con $2",t_en:"Eat Ramen",d_en:"Survive on $2"},
+            {s:'int',xp:200,t:"Estudiar",d:"Leer PDFs borrosos",t_en:"Study",d_en:"Read blurry PDFs"},
+            {s:'int',xp:250,t:"Hacer examen",d:"Me colgue, verdad?",t_en:"Take exam",d_en:"I failed, right?"},
+            {s:'cha',xp:200,t:"Trabajo Grupo",d:"Nadie hace nada",t_en:"Group Project",d_en:"Carrying the team"},
+            {s:'cha',xp:150,t:"Fiesta",d:"Jueves universitario",t_en:"Party",d_en:"College Thursday"},
+            {s:'str',xp:150,t:"Caminata",d:"Sesión intensa",t_en:"Long Walks",d_en:"Intense walking session"},
+            {s:'str',xp:300,t:"All-Nighter",d:"Sin dormir 24h",t_en:"All-Nighter",d_en:"No sleep 24h"},
+            {s:'cha',xp:100,t:"Elogios del profe",d:"Este profe sabe",t_en:"Professor Appreciation",d_en:"Thank you professor!"}
+        ] 
+    },
+
     // --- 🛠️ OFICIOS (TRADES) ---
     mechanic: { 
         es: "Mecánico", en: "Mechanic", 
@@ -288,7 +302,7 @@ const JOBS_DB = {
             {s:'str',xp:250,t:"Equipo",d:"Mover máquina",t_en:"Gear",d_en:"Move machine"},
             {s:'int',xp:150,t:"Químicos",d:"Mezcla cloro",t_en:"Chems",d_en:"Mix bleach"},
             {s:'int',xp:100,t:"Boquillas",d:"Elegir presión",t_en:"Nozzles",d_en:"Choose pressure"},
-            {s:'cha',xp:100,t:"Venta",d:"Ofrecer sellado",t_en:"Upsell",d_en:"Offer sealing"}
+            {s:'cha',xp:100,t:"Venta",d:"Ofrecer extra",t_en:"Upsell",d_en:"Offer extra"}
         ] 
     },
     pest: { 
@@ -413,7 +427,7 @@ const JOBS_DB = {
             {s:'cha',xp:150,t:"Proveedores",d:"Coordinar catering",t_en:"Vendors",d_en:"Coord catering"},
             {s:'int',xp:100,t:"Plan B",d:"Lluvia imprevista",t_en:"Plan B",d_en:"Sudden rain"}
         ] 
-    }, // <-- Esta coma es importante para conectar con la parte anterior
+    },
 
     // --- 🏥 SALUD (HEALTH) ---
     doctor: { 
@@ -753,7 +767,7 @@ const JOBS_DB = {
         ] 
     },
 
-    // --- 🎓 ESTUDIANTES (STUDENTS) ---
+    // --- 🎓 OTROS ESTUDIANTES (STUDENTS) ---
     stu_hs: { 
         es: "Est. Secundaria", en: "HS Student", 
         m: [
@@ -834,21 +848,20 @@ const JOBS_DB = {
 };
 
 const GROUPS = {
+    "🎓 ESTUDIANTES": ["stu_gen","stu_hs","stu_med","stu_law","stu_eng","stu_arts","stu_biz","stu_sci"],
     "🛠️ OFICIOS": ["mechanic","electric","plumber","welder","carpenter","hvac","mason","painter","landscaper","pw","pest","locksmith","roofer","solar"],
     "🤝 SERVICIO": ["chef","bartender","barista","server","frontdesk","flightatt","eventplan"],
     "🏥 SALUD": ["doctor","nurse","emt","dentist","vet","pharm","pt","trainer"],
     "🚚 TRANSPORTE": ["trucker","delivery","pilot","police","fire","security","military"],
     "💼 CORPORATIVO": ["lawyer","accountant","hr","pm","adminasst","realestate","sales_ret","consultant"],
-    "🎨 CREATIVO": ["dev","designer","photo","video","architect","musician","tattoo"],
-    "🎓 ESTUDIANTES": ["stu_hs","stu_med","stu_law","stu_eng","stu_arts","stu_biz","stu_sci"]
+    "🎨 CREATIVO": ["dev","designer","photo","video","architect","musician","tattoo"]
 };
 
 const T = {
-    es: { t_create:"CREA TU PERFIL", l_name:"Nombre", l_clan:"Clan", l_job:"Profesión", b_start:"EMPEZAR", l_lvl:"Nivel", s_str:"FUERZA", s_cha:"CARISMA", s_int:"MENTE", b_reset:"Reiniciar", t_danger:"ZONA DE PELIGRO", d_reset:"Nombre para borrar:", b_del:"BORRAR", b_sync:"GUARDAR NUBE", clans:["🦁 Leones","🦊 Zorros","🔮 Magos","🐍 Serpientes","🐐 Cabras"] },
-    en: { t_create:"CREATE PROFILE", l_name:"Name", l_clan:"Clan", l_job:"Profession", b_start:"START", l_lvl:"Level", s_str:"STRENGTH", s_cha:"CHARISMA", s_int:"MIND", b_reset:"Reset", t_danger:"DANGER ZONE", d_reset:"Name to delete:", b_del:"DELETE", b_sync:"SAVE CLOUD", clans:["🦁 Lions","🦊 Foxes","🔮 Mages","🐍 Serpents","🐐 Goats"] }
+    es: { t_create:"CREA TU PERFIL", l_name:"Nombre", l_clan:"Clan", l_job:"Profesión", b_start:"EMPEZAR", l_lvl:"Nivel", s_str:"FUERZA", s_cha:"CARISMA", s_int:"MENTE", b_reset:"Reiniciar", t_danger:"ZONA DE PELIGRO", d_reset:"Nombre para borrar:", b_del:"BORRAR", clans:["🦁 Leones","🦊 Zorros","🔮 Magos","🐍 Serpientes","🐐 Cabras"] },
+    en: { t_create:"CREATE PROFILE", l_name:"Name", l_clan:"Clan", l_job:"Profession", b_start:"START", l_lvl:"Level", s_str:"STRENGTH", s_cha:"CHARISMA", s_int:"MIND", b_reset:"Reset", t_danger:"DANGER ZONE", d_reset:"Name to delete:", b_del:"DELETE", clans:["🦁 Lions","🦊 Foxes","🔮 Mages","🐍 Serpents","🐐 Goats"] }
 };
 
-/* --- VARIABLES GLOBALES Y ESTADO DEL JUGADOR --- */
 let lang='es', mode='work';
 let player={
     name:"", clan:"", jobKey:"", lvl:1, xp:0, next:1000, 
